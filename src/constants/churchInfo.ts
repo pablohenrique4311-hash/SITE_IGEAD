@@ -15,7 +15,14 @@ export const CHURCH_INFO = {
     oneLine: 'Rua Dezessete, Quadra 107, Lote 38/39, Bairro Pedra 90, Cuiabá - MT - 78099-085',
   },
   googleMapsUrl: 'https://share.google/JKSkv4gQxngO6wmb9',
+  email: 'igrejageracaoeleita123@gmail.com',
+  phone: '(65) 99644-3569',
+  phoneClean: '5565996443569',
+  whatsappGroupUrl: 'https://chat.whatsapp.com/CLoJKqJN31NI3N2bdO8YfR',
+  instagramUrl: 'https://www.instagram.com/igead_cba/',
+  instagramHandle: '@igead_cba',
   channelId: 'UCwWs_spTAEZaojGQDQSYQ-A',
   channelUrl: 'https://www.youtube.com/channel/UCwWs_spTAEZaojGQDQSYQ-A',
   scheduleSummary: 'Quartas (Mulheres), Sextas (Sexta Profética) e Domingos (Culto da Família) — sempre às 19:30',
 };
+

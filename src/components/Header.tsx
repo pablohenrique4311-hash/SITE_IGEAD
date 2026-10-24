@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { BookOpen, Radio, Calendar, FileText, Info, Menu, X } from 'lucide-react';
+import { BookOpen, Radio, Calendar, FileText, Info, Menu, X, Instagram, MessageCircle } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { ChurchLogo } from './ChurchLogo';
+import { CHURCH_INFO } from '../constants/churchInfo';
 
 export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'about';
 
@@ -53,46 +55,41 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-20 gap-3 lg:gap-4">
           {/* Logo / Nome Oficial */}
           <button
             type="button"
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
+            className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none shrink-0"
             aria-label="Página inicial da IGEAD-MT"
           >
-            {/* Logotipo Oficial IGEAD-MT */}
-            <img
-              src="/assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png"
-              alt="Logotipo Oficial Igreja Geração Eleita IGEAD-MT"
-              className="w-14 h-14 sm:w-16 sm:h-16 object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
-            />
+            {/* Logotipo Oficial IGEAD-MT com fallback elegante */}
+            <ChurchLogo size="md" className="group-hover:scale-105" />
 
-
-            <div className="flex flex-col">
+            <div className="flex flex-col justify-center">
               <div className="flex items-center gap-2">
-                <span className="font-cinzel font-bold text-base sm:text-lg tracking-tight text-zinc-900 dark:text-zinc-50 whitespace-nowrap group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                <span className="font-cinzel font-bold text-base sm:text-lg tracking-tight text-zinc-900 dark:text-zinc-50 whitespace-nowrap leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                   IGEAD-MT
                 </span>
 
-                <span className="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                <span className="hidden sm:inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap leading-none">
                   Geração Eleita
                 </span>
                 {isLive && (
-                  <span className="flex items-center gap-1 text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full animate-pulse">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap leading-none">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                     AO VIVO
                   </span>
                 )}
               </div>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+              <span className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-normal whitespace-nowrap">
                 Igreja Geração Eleita • Mato Grosso
               </span>
             </div>
           </button>
 
           {/* Navegação Desktop */}
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Navegação principal">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 shrink-0" aria-label="Navegação principal">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
               return (
@@ -100,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => handleNavClick(item.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap ${
                     isActive
                       ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/20'
                       : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
@@ -115,16 +112,31 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Ações do Topo */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Botão rápido para a Bíblia no Desktop */}
-            <button
-              type="button"
-              onClick={() => handleNavClick('bible')}
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider bg-zinc-900 text-white hover:bg-amber-600 dark:bg-amber-500 dark:text-zinc-950 dark:hover:bg-amber-400 shadow-sm transition-all duration-200 cursor-pointer"
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Instagram da Igreja com Logo Oficial */}
+            <a
+              href={CHURCH_INFO.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center justify-center p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title="Instagram Oficial @igead_cba"
+              aria-label="Instagram Oficial @igead_cba"
             >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Ler a Bíblia</span>
-            </button>
+              <Instagram className="w-4 h-4" />
+            </a>
+
+            {/* Grupo WhatsApp da Igreja */}
+            <a
+              href={CHURCH_INFO.whatsappGroupUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 p-2 2xl:px-2.5 2xl:py-1.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-emerald-500/20 transition-colors whitespace-nowrap"
+              title="Entrar no Grupo Oficial do WhatsApp"
+              aria-label="Grupo Oficial do WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 fill-current" />
+              <span className="hidden 2xl:inline">WhatsApp</span>
+            </a>
 
             {/* Alternância de tema Claro / Escuro */}
             <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
@@ -133,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none cursor-pointer"
+              className="lg:hidden inline-flex items-center justify-center p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none cursor-pointer"
               aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu de navegação'}
               aria-expanded={mobileMenuOpen}
             >
@@ -173,6 +185,29 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
+
+            {/* Ações Sociais Rápidas no Menu Mobile */}
+            <div className="pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-2">
+              <a
+                href={CHURCH_INFO.whatsappGroupUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 text-white font-semibold text-sm shadow-xs"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Entrar no Grupo do WhatsApp</span>
+              </a>
+
+              <a
+                href={CHURCH_INFO.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-600 text-white font-semibold text-sm shadow-xs"
+              >
+                <Instagram className="w-4 h-4" />
+                <span>Instagram @igead_cba</span>
+              </a>
+            </div>
           </nav>
         </div>
       )}

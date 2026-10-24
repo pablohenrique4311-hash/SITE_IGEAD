@@ -10,7 +10,11 @@ import {
   Navigation,
   ExternalLink,
   Copy,
-  CheckCheck
+  CheckCheck,
+  Phone,
+  Mail,
+  Instagram,
+  MessageCircle
 } from 'lucide-react';
 import { ChurchEvent } from '../types';
 import { CHURCH_INFO } from '../constants/churchInfo';
@@ -285,6 +289,80 @@ export const EventsSection: React.FC = () => {
               <span>Copiar Endereço</span>
             </button>
           </div>
+        </div>
+
+        {/* Informações de Contato, Grupo WhatsApp e Instagram */}
+        <div className="mt-8 pt-6 border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Telefone */}
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Phone className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">Telefone</span>
+              <a
+                href={`tel:+${CHURCH_INFO.phoneClean}`}
+                className="text-xs font-bold text-zinc-800 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors truncate block"
+              >
+                {CHURCH_INFO.phone}
+              </a>
+            </div>
+          </div>
+
+          {/* E-mail */}
+          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Mail className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">E-mail</span>
+              <a
+                href={`mailto:${CHURCH_INFO.email}`}
+                className="text-xs font-medium text-zinc-800 dark:text-zinc-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors truncate block"
+                title={CHURCH_INFO.email}
+              >
+                {CHURCH_INFO.email}
+              </a>
+            </div>
+          </div>
+
+          {/* Grupo WhatsApp */}
+          <a
+            href={CHURCH_INFO.whatsappGroupUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors group cursor-pointer"
+            title="Entrar no Grupo Oficial do WhatsApp"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
+              <MessageCircle className="w-4 h-4 fill-current" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase font-bold text-emerald-100 block tracking-wider">WhatsApp</span>
+              <span className="text-xs font-bold truncate block group-hover:underline">
+                Entrar no Grupo
+              </span>
+            </div>
+          </a>
+
+          {/* Instagram */}
+          <a
+            href={CHURCH_INFO.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-600 hover:opacity-95 text-white shadow-xs transition-opacity group cursor-pointer"
+            title="Seguir Instagram oficial da igreja @igead_cba"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
+              <Instagram className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] uppercase font-bold text-pink-100 block tracking-wider">Instagram</span>
+              <span className="text-xs font-bold truncate block group-hover:underline">
+                {CHURCH_INFO.instagramHandle}
+              </span>
+            </div>
+          </a>
         </div>
       </div>
 
