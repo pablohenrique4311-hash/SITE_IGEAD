@@ -6,6 +6,7 @@ import { LatestVideos } from './components/LatestVideos';
 import { EventsSection } from './components/EventsSection';
 import { ContentSection } from './components/ContentSection';
 import { AboutSection } from './components/AboutSection';
+import { GivingSection } from './components/GivingSection';
 import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
@@ -148,6 +149,8 @@ export default function App() {
             onOpenBibleReference={(bookId, chapter) => navigateTo('bible', bookId, chapter)}
           />
         )}
+
+        {currentPage === 'giving' && <GivingSection />}
 
         {currentPage === 'about' && <AboutSection />}
       </main>

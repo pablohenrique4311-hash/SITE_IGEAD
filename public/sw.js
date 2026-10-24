@@ -1,4 +1,4 @@
-const CACHE_NAME = 'igead-pwa-v1';
+const CACHE_NAME = 'igead-pwa-v2';
 
 // Recursos estáticos fundamentais para pré-carregamento offline
 const PRECACHE_URLS = [
@@ -10,7 +10,8 @@ const PRECACHE_URLS = [
   './apple-touch-icon.png',
   './data/pt_acf.json',
   './data/en_kjv.json',
-  './assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png'
+  './assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png',
+  './assets/aistudio/pix_qrcode.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -56,6 +57,19 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('youtube.com') ||
     url.hostname.includes('googlevideo.com')
   ) {
+    return;
+  }
+
+  // Módulos Vite e código-fonte em desenvolvimento: Sempre Network-First para evitar código obsoleto
+  if (
+    url.pathname.includes('/src/') ||
+    url.pathname.includes('/@vite/') ||
+    url.pathname.includes('/@fs/') ||
+    url.pathname.includes('/node_modules/')
+  ) {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request))
+    );
     return;
   }
 

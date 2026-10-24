@@ -18,6 +18,7 @@ export const CHURCH_INFO = {
   email: 'igrejageracaoeleita123@gmail.com',
   phone: '(65) 99644-3569',
   phoneClean: '5565996443569',
+  whatsappContactUrl: 'https://wa.me/5565996443569?text=Ol%C3%A1%2C%20paz%20do%20Senhor!%20Gostaria%20de%20enviar%20um%20comprovante%20de%20d%C3%ADzimo%2Foferta.',
   whatsappGroupUrl: 'https://chat.whatsapp.com/CLoJKqJN31NI3N2bdO8YfR',
   instagramUrl: 'https://www.instagram.com/igead_cba/',
   instagramHandle: '@igead_cba',

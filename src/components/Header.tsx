@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { BookOpen, Radio, Calendar, FileText, Info, Menu, X, Instagram, MessageCircle, Download } from 'lucide-react';
+import { BookOpen, Radio, Calendar, FileText, Info, Menu, X, Instagram, MessageCircle, Download, HeartHandshake } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { ChurchLogo } from './ChurchLogo';
 import { CHURCH_INFO } from '../constants/churchInfo';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 
-export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'about';
+export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'giving' | 'about';
 
 interface HeaderProps {
   currentPage: PageId;
@@ -45,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
     },
     { id: 'agenda', label: 'Programação', icon: <Calendar className="w-4 h-4" /> },
     { id: 'content', label: 'Estudos', icon: <FileText className="w-4 h-4" /> },
+    { id: 'giving', label: 'Dízimos & Ofertas', icon: <HeartHandshake className="w-4 h-4 text-amber-600 dark:text-amber-400" /> },
     { id: 'about', label: 'Sobre & Contato', icon: <Info className="w-4 h-4" /> }
   ];
 
@@ -99,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => handleNavClick(item.id)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-xl text-xs xl:text-xs 2xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap ${
                     isActive
                       ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/20'
                       : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
