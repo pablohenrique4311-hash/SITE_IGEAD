@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { BookOpen, Radio, Calendar, FileText, Info, Menu, X, Instagram, MessageCircle } from 'lucide-react';
+import { BookOpen, Radio, Calendar, FileText, Info, Menu, X, Instagram, MessageCircle, Download } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { ChurchLogo } from './ChurchLogo';
 import { CHURCH_INFO } from '../constants/churchInfo';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'about';
 
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   isLive
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
 
   const navItems: { id: PageId; label: string; icon: React.ReactNode; isSpecial?: boolean }[] = [
     { id: 'home', label: 'Início', icon: null },
@@ -186,8 +188,26 @@ export const Header: React.FC<HeaderProps> = ({
               );
             })}
 
-            {/* Ações Sociais Rápidas no Menu Mobile */}
+            {/* Ações Sociais e PWA no Menu Mobile */}
             <div className="pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-2">
+              {!isInstalled && (isInstallable || isIOS) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (isIOS) {
+                      window.dispatchEvent(new CustomEvent('open-ios-install'));
+                    } else {
+                      install();
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm shadow-xs transition-colors cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Instalar Aplicativo IGEAD-MT</span>
+                </button>
+              )}
+
               <a
                 href={CHURCH_INFO.whatsappGroupUrl}
                 target="_blank"

@@ -2,7 +2,6 @@
   "name": "Igreja Geração Eleita — IGEAD-MT",
   "description": "Site oficial da Igreja Geração Eleita (IGEAD-MT) em Mato Grosso. Bíblia Sagrada online (JFA e KJV), transmissões ao vivo pelo YouTube, programação de cultos, estudos e mensagens.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
+

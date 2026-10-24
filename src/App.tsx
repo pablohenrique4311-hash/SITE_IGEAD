@@ -8,6 +8,8 @@ import { ContentSection } from './components/ContentSection';
 import { AboutSection } from './components/AboutSection';
 import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { YouTubeLiveStatus, YouTubeVideo } from './types';
 import { checkLiveStream, getLatestVideos } from './services/youtubeService';
 
@@ -152,6 +154,12 @@ export default function App() {
 
       {/* Rodapé com Identificação da Igreja e Navegação Completa */}
       <Footer onNavigate={navigateTo} />
+
+      {/* Indicador de Conectividade / Modo Offline do PWA */}
+      <OfflineIndicator />
+
+      {/* Banner / Botão Flutuante Discreto de Instalação do Aplicativo (PWA) */}
+      <PWAInstallBanner />
 
       {/* Botão Fixo/Flutuante para Comunidade e Grupo Oficial no WhatsApp */}
       <FloatingWhatsApp />
