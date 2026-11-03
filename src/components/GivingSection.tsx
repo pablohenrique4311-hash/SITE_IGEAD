@@ -24,12 +24,12 @@ export const GivingSection: React.FC = () => {
     tipoChave: 'Celular',
     chaveFormatada: '(65) 99644-3569',
     chaveCopia: '65996443569',
-    // QR Code dinâmico e fallback de asset local gerado a partir do PDF
-    qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=65996443569',
-    localQrCodeUrl: `${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/assets/aistudio/pix_qrcode.png`
+    // QR Code oficial fornecido pelo usuário
+    qrCodeUrl: `${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/assets/aistudio/2026-01-24_122424.pdf_93f47d23.png`,
+    fallbackQrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=65996443569'
   };
 
-  const [useLocalQr, setUseLocalQr] = useState(false);
+  const [qrImgError, setQrImgError] = useState(false);
 
   const handleCopyPix = async () => {
     let success = false;
@@ -115,10 +115,10 @@ export const GivingSection: React.FC = () => {
           {/* Moldura do QR Code */}
           <div className="relative p-4 rounded-2xl bg-white border-2 border-amber-400/40 shadow-inner group hover:border-amber-500 transition-colors">
             <img
-              src={useLocalQr ? pixData.localQrCodeUrl : pixData.qrCodeUrl}
+              src={qrImgError ? pixData.fallbackQrCodeUrl : pixData.qrCodeUrl}
               alt="QR Code Pix Igreja Geração Eleita"
               className="w-56 h-56 sm:w-60 sm:h-60 object-contain rounded-lg"
-              onError={() => setUseLocalQr(true)}
+              onError={() => setQrImgError(true)}
               loading="eager"
             />
             <div className="mt-2 text-[11px] text-zinc-500 font-medium">

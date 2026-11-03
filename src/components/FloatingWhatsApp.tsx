@@ -6,7 +6,7 @@ export const FloatingWhatsApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end pointer-events-auto">
+    <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end pointer-events-auto">
       {/* Popover Card quando expandido */}
       {isOpen && (
         <div className="mb-3 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-4 animate-in fade-in slide-in-from-bottom-2 duration-150">

@@ -11,7 +11,7 @@ const PRECACHE_URLS = [
   './data/pt_acf.json',
   './data/en_kjv.json',
   './assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png',
-  './assets/aistudio/pix_qrcode.png'
+  './assets/aistudio/2026-01-24_122424.pdf_93f47d23.png'
 ];
 
 self.addEventListener('install', (event) => {
