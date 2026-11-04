@@ -8,10 +8,6 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
-  Sparkles,
-  LogIn,
-  UserPlus,
-  ShieldCheck,
   MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -135,326 +131,114 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
     }
   };
 
-  return (
-    <div className="min-h-screen w-full flex flex-col justify-between bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
-      {/* Barra Superior Discreta com Alternância de Tema */}
-      <header className="w-full px-4 sm:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <ChurchLogo size="sm" />
-          <div className="flex flex-col">
-            <span className="font-cinzel font-bold text-sm text-zinc-900 dark:text-zinc-100 leading-tight">
-              IGEAD-MT
-            </span>
-            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium hidden sm:inline">
-              Igreja Geração Eleita • Mato Grosso
-            </span>
-          </div>
-        </div>
+  const fieldClass = 'w-full h-[52px] pl-11 pr-12 rounded-lg border border-slate-200 bg-slate-50 text-base text-slate-900 placeholder:text-slate-400 shadow-xs outline-none transition focus:border-emerald-600 focus:ring-3 focus:ring-emerald-600/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white';
 
-        <div className="flex items-center gap-2">
+  return (
+    <main className="min-h-dvh grid lg:grid-cols-[3fr_2fr] bg-white text-slate-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <section className="relative hidden lg:block overflow-hidden bg-emerald-950" aria-label="Paisagem de montanhas ao amanhecer">
+        <img
+          src={`${import.meta.env.BASE_URL}assets/login-landscape.jpg`}
+          alt="Montanhas cobertas por névoa à luz do amanhecer"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/85 via-emerald-950/15 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-12 xl:p-16 text-white">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-200">Fé que nos une</p>
+          <blockquote className="max-w-xl font-serif-reading text-3xl xl:text-4xl leading-snug">“Até aqui nos ajudou o Senhor.”</blockquote>
+          <p className="mt-4 text-sm text-white/70">1 Samuel 7:12</p>
+          <div className="mt-10 h-px w-12 bg-emerald-300/60" />
+          <p className="mt-6 text-sm text-white/75">Igreja Geração Eleita · Mato Grosso</p>
+        </div>
+      </section>
+
+      <section className="relative flex min-h-dvh items-center justify-center px-6 py-24 sm:px-12 lg:px-10 xl:px-16">
+        <div className="absolute right-5 top-5 sm:right-8 sm:top-7">
           <ThemeToggle isDark={isDark} onToggle={onToggleTheme} />
         </div>
-      </header>
-
-      {/* Conteúdo Central: Card Elegante de Autenticação */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-3xl shadow-xl overflow-hidden transition-all duration-200">
-          {/* Faixa decorativa superior com gradiente sutil dourado */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600" />
-
-          <div className="p-6 sm:p-8">
-            {/* Logotipo e Identificação */}
-            <div className="text-center mb-6">
-              <div className="flex justify-center mb-3">
-                <ChurchLogo size="md" className="shadow-xs" />
-              </div>
-
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 mb-2">
-                <Sparkles className="w-3 h-3" />
-                <span>Portal da Comunidade</span>
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl font-bold font-cinzel text-zinc-900 dark:text-zinc-50 tracking-tight">
-                {tab === 'login' ? 'Entrar no Aplicativo' : 'Cadastro de Membro'}
-              </h1>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5 max-w-xs mx-auto leading-relaxed">
-                {tab === 'login'
-                  ? 'Acesse a Bíblia Sagrada, cultos ao vivo, estudos bíblicos e pedidos de oração'
-                  : 'Crie sua conta para participar da comunidade IGEAD-MT'}
-              </p>
-            </div>
-
-            {/* Alternância de Abas: Entrar / Criar Conta */}
-            <div className="flex items-center p-1 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60 mb-6">
-              <button
-                type="button"
-                onClick={() => handleTabChange('login')}
-                className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  tab === 'login'
-                    ? 'bg-white dark:bg-zinc-900 text-amber-700 dark:text-amber-300 shadow-xs border border-zinc-200/80 dark:border-zinc-700 font-bold'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-                }`}
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Entrar</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTabChange('register')}
-                className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  tab === 'register'
-                    ? 'bg-white dark:bg-zinc-900 text-amber-700 dark:text-amber-300 shadow-xs border border-zinc-200/80 dark:border-zinc-700 font-bold'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-                }`}
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>Criar Conta</span>
-              </button>
-            </div>
-
-            {/* Mensagens de Feedback */}
-            {errorMessage && (
-              <div className="mb-5 p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-700 dark:text-red-300 animate-in fade-in duration-150">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600 dark:text-red-400 mt-0.5" />
-                <div className="leading-relaxed">{errorMessage}</div>
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-800 dark:text-emerald-300 animate-in fade-in duration-150">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
-                <div className="leading-relaxed font-medium">{successMessage}</div>
-              </div>
-            )}
-
-            {/* FORMULÁRIO: LOGIN */}
-            {tab === 'login' ? (
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Endereço de E-mail
-                  </label>
-                  <div className="relative flex items-center">
-                    <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu.email@exemplo.com"
-                      autoComplete="email"
-                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                    Senha
-                  </label>
-                  <div className="relative flex items-center">
-                    <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
-                      aria-label={showPassword ? 'Ocultar senha' : 'Ver senha'}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full mt-2 py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-zinc-950 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Validando acesso...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="w-4 h-4" />
-                      <span>Entrar no Aplicativo</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="text-center pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('register')}
-                    className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                  >
-                    Ainda não possui conta?{' '}
-                    <strong className="underline font-bold text-amber-700 dark:text-amber-400">
-                      Cadastre-se gratuitamente
-                    </strong>
-                  </button>
-                </div>
-              </form>
-            ) : (
-              /* FORMULÁRIO: CADASTRO */
-              <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Nome Completo
-                  </label>
-                  <div className="relative flex items-center">
-                    <UserIcon className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type="text"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Ex: João da Silva"
-                      autoComplete="name"
-                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Endereço de E-mail
-                  </label>
-                  <div className="relative flex items-center">
-                    <Mail className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu.email@exemplo.com"
-                      autoComplete="email"
-                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Senha (mínimo de 6 caracteres)
-                    </label>
-                    <div className="relative flex items-center">
-                      <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••"
-                        autoComplete="new-password"
-                        className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
-                        aria-label={showPassword ? 'Ocultar senha' : 'Ver senha'}
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                      Confirmar Senha
-                    </label>
-                    <div className="relative flex items-center">
-                      <Lock className="w-4 h-4 text-zinc-400 absolute left-3.5 pointer-events-none" />
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="••••••"
-                        autoComplete="new-password"
-                        className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
-                        aria-label={showConfirmPassword ? 'Ocultar senha' : 'Ver senha'}
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full mt-2 py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-zinc-950 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Criando sua conta...</span>
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-4 h-4" />
-                      <span>Concluir Cadastro</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="text-center pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('login')}
-                    className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 font-medium transition-colors cursor-pointer"
-                  >
-                    Já possui uma conta cadastrada?{' '}
-                    <strong className="underline font-bold text-amber-700 dark:text-amber-400">
-                      Entrar
-                    </strong>
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Aviso de Segurança e Contato */}
-            <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-col items-center gap-2 text-center">
-              <div className="inline-flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Autenticação criptografada Supabase</span>
-              </div>
-              <a
-                href={CHURCH_INFO.whatsappContactUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-400 hover:underline"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Dificuldades para acessar? Fale no WhatsApp</span>
-              </a>
+        <div className="w-full max-w-96">
+          <div className="mb-9 flex items-center justify-center gap-3">
+            <ChurchLogo size="lg" />
+            <div>
+              <p className="text-xl font-bold tracking-tight">IGEAD-MT</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">Igreja Geração Eleita</p>
             </div>
           </div>
-        </div>
-      </main>
+          <div className="mb-9 text-center">
+            <h1 className="text-[30px] font-bold tracking-tight">{tab === 'login' ? 'Bem-vindo de volta' : 'Faça parte da comunidade'}</h1>
+            <p className="mt-3 text-base leading-7 text-slate-500 dark:text-zinc-400">
+              {tab === 'login' ? 'Entre com suas credenciais para acessar o portal da nossa igreja.' : 'Crie sua conta e caminhe conosco na fé.'}
+            </p>
+          </div>
 
-      {/* Rodapé da Tela de Login */}
-      <footer className="w-full py-4 text-center text-[11px] text-zinc-400 dark:text-zinc-500">
-        © {new Date().getFullYear()} Igreja Geração Eleita — IGEAD-MT. Todos os direitos reservados.
-      </footer>
-    </div>
+          {errorMessage && (
+            <div role="alert" className="mb-6 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /><p>{errorMessage}</p>
+            </div>
+          )}
+          {successMessage && (
+            <div role="status" className="mb-6 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /><p>{successMessage}</p>
+            </div>
+          )}
+
+          <form onSubmit={tab === 'login' ? handleLoginSubmit : handleRegisterSubmit} className="space-y-6" aria-label={tab === 'login' ? 'Entrar na conta' : 'Criar conta'}>
+            <fieldset disabled={isSubmitting} className="space-y-6 disabled:opacity-70">
+              {tab === 'register' && (
+                <div>
+                  <label htmlFor="auth-name" className="mb-2 block text-sm font-medium">Nome completo</label>
+                  <div className="relative flex items-center">
+                    <UserIcon className="pointer-events-none absolute left-3.5 h-[18px] w-[18px] text-slate-400" />
+                    <input id="auth-name" required autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome e sobrenome" className={fieldClass} />
+                  </div>
+                </div>
+              )}
+              <div>
+                <label htmlFor="auth-email" className="mb-2 block text-sm font-medium">E-mail</label>
+                <div className="relative flex items-center">
+                  <Mail className="pointer-events-none absolute left-3.5 h-[18px] w-[18px] text-slate-400" />
+                  <input id="auth-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com.br" className={fieldClass} />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="auth-password" className="mb-2 block text-sm font-medium">Senha</label>
+                <div className="relative flex items-center">
+                  <Lock className="pointer-events-none absolute left-3.5 h-[18px] w-[18px] text-slate-400" />
+                  <input id="auth-password" type={showPassword ? 'text' : 'password'} required minLength={tab === 'register' ? 6 : undefined} autoComplete={tab === 'login' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={fieldClass} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={showPassword} className="absolute right-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded text-slate-400 hover:text-emerald-600 focus-visible:outline-2 focus-visible:outline-emerald-600">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              {tab === 'register' && (
+                <div>
+                  <label htmlFor="auth-confirm" className="mb-2 block text-sm font-medium">Confirmar senha</label>
+                  <div className="relative flex items-center">
+                    <Lock className="pointer-events-none absolute left-3.5 h-[18px] w-[18px] text-slate-400" />
+                    <input id="auth-confirm" type={showConfirmPassword ? 'text' : 'password'} required minLength={6} autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita sua senha" className={fieldClass} />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'} aria-pressed={showConfirmPassword} className="absolute right-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded text-slate-400 hover:text-emerald-600 focus-visible:outline-2 focus-visible:outline-emerald-600">
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400">Use no mínimo 6 caracteres.</p>
+                </div>
+              )}
+              <button type="submit" className="flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#36956e] px-4 text-base font-semibold text-white shadow-lg shadow-emerald-700/15 transition hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-600 disabled:cursor-wait">
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isSubmitting ? 'Aguarde...' : tab === 'login' ? 'Entrar no portal' : 'Criar minha conta'}
+              </button>
+            </fieldset>
+          </form>
+          <p className="mt-10 text-center text-sm leading-7 text-slate-600 dark:text-zinc-400">
+            {tab === 'login' ? 'Ainda não possui uma conta? ' : 'Já possui uma conta? '}
+            <button type="button" disabled={isSubmitting} onClick={() => handleTabChange(tab === 'login' ? 'register' : 'login')} className="cursor-pointer rounded font-semibold text-emerald-700 hover:underline focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-emerald-400 disabled:opacity-60">
+              {tab === 'login' ? 'Cadastre-se' : 'Entre aqui'}
+            </button>
+          </p>
+          <a href={`https://wa.me/${CHURCH_INFO.phoneClean}?text=${encodeURIComponent('A paz do Senhor! Preciso de ajuda para acessar minha conta no portal IGEAD.')}`} target="_blank" rel="noopener noreferrer" className="mx-auto mt-6 flex w-fit items-center gap-1.5 rounded text-xs text-slate-500 hover:text-emerald-700 dark:text-zinc-400">
+            <MessageCircle size={14} />Precisa de ajuda para acessar?
+          </a>
+        </div>
+      </section>
+    </main>
   );
 };
