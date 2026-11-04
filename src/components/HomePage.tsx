@@ -36,15 +36,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   return (
     <div className="w-full">
-      {/* SEÇÃO 1: TRANSMISSÃO AO VIVO DO YOUTUBE OU ÚLTIMO CULTO */}
-      <LiveSection
-        liveStatus={liveStatus}
-        latestVideo={videos.length > 0 ? videos[0] : null}
-        onRefreshLive={onRefreshLive}
-      />
-
-
-      {/* SEÇÃO 2: ÁREA DE DESTAQUE / HERO CRISTÃO */}
+      {/* SEÇÃO 1: ÁREA DE BOAS-VINDAS / HERO CRISTÃO */}
       <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-gradient-to-b from-amber-500/5 via-transparent to-transparent">
         {/* Glow dourado suave de fundo */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -88,6 +80,13 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </section>
+
+      {/* SEÇÃO 2: TRANSMISSÃO AO VIVO DO YOUTUBE OU VÍDEO EM DESTAQUE */}
+      <LiveSection
+        liveStatus={liveStatus}
+        latestVideo={videos.length > 0 ? videos[0] : null}
+        onRefreshLive={onRefreshLive}
+      />
 
       {/* SEÇÃO 3: VERSÍCULO DO DIA */}
       <VerseOfTheDay
