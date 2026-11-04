@@ -8,13 +8,13 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_automation_settings (
   is_enabled BOOLEAN NOT NULL DEFAULT false,
   scheduled_time TEXT NOT NULL DEFAULT '07:00',
   timezone TEXT NOT NULL DEFAULT 'America/Cuiaba',
-  target_group_id TEXT NOT NULL DEFAULT '120363049182394@g.us',
+  target_group_id TEXT NOT NULL DEFAULT '120363361678530962@g.us',
   target_group_name TEXT NOT NULL DEFAULT 'IGEAD-MT • Grupo Oficial da Igreja',
-  provider_type TEXT NOT NULL DEFAULT 'simulation', -- 'simulation' | 'evolution' | 'zapi'
-  provider_endpoint TEXT,
-  provider_instance_name TEXT,
+  provider_type TEXT NOT NULL DEFAULT 'greenapi', -- 'greenapi' | 'evolution' | 'zapi' | 'simulation'
+  provider_endpoint TEXT DEFAULT 'https://7107.api.greenapi.com',
+  provider_instance_name TEXT DEFAULT '710722790899',
   provider_api_key TEXT,
-  provider_token TEXT,
+  provider_token TEXT DEFAULT 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8',
   last_sent_at TIMESTAMPTZ,
   last_error TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
@@ -23,12 +23,17 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_automation_settings (
 
 -- Insere configuração padrão inicial se não existir
 INSERT INTO public.whatsapp_automation_settings (
-  id, is_enabled, scheduled_time, timezone, target_group_id, target_group_name, provider_type
+  id, is_enabled, scheduled_time, timezone, target_group_id, target_group_name, provider_type, provider_endpoint, provider_instance_name, provider_token
 )
 VALUES (
-  'default', false, '07:00', 'America/Cuiaba', '120363049182394@g.us', 'IGEAD-MT • Grupo Oficial da Igreja', 'simulation'
+  'default', false, '07:00', 'America/Cuiaba', '120363361678530962@g.us', 'IGEAD-MT • Grupo Oficial da Igreja', 'greenapi', 'https://7107.api.greenapi.com', '710722790899', 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  target_group_id = EXCLUDED.target_group_id,
+  provider_type = EXCLUDED.provider_type,
+  provider_endpoint = EXCLUDED.provider_endpoint,
+  provider_instance_name = EXCLUDED.provider_instance_name,
+  provider_token = EXCLUDED.provider_token;
 
 -- 2. Tabela de Fila de Mensagens da Automação
 CREATE TABLE IF NOT EXISTS public.whatsapp_message_queue (

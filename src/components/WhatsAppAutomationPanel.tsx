@@ -255,9 +255,9 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_automation_settings (
   is_enabled BOOLEAN NOT NULL DEFAULT false,
   scheduled_time TEXT NOT NULL DEFAULT '07:00',
   timezone TEXT NOT NULL DEFAULT 'America/Cuiaba',
-  target_group_id TEXT NOT NULL DEFAULT '120363049182394@g.us',
+  target_group_id TEXT NOT NULL DEFAULT '120363361678530962@g.us',
   target_group_name TEXT NOT NULL DEFAULT 'IGEAD-MT • Grupo Oficial da Igreja',
-  provider_type TEXT NOT NULL DEFAULT 'simulation',
+  provider_type TEXT NOT NULL DEFAULT 'evolution',
   provider_endpoint TEXT,
   provider_instance_name TEXT,
   provider_api_key TEXT,
@@ -680,39 +680,64 @@ CREATE POLICY "Acesso restrito ao administrador whatsapp_message_history"
                 <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/60 space-y-3 pt-3">
                   <div className="text-xs font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                     <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Credenciais do Gateway ({settings.providerType === 'evolution' ? 'Evolution API' : 'Z-API'})</span>
+                    <span>
+                      Credenciais do Gateway (
+                      {settings.providerType === 'greenapi'
+                        ? 'GREEN-API (Gratuito / Developer)'
+                        : settings.providerType === 'evolution'
+                        ? 'Evolution API'
+                        : 'Z-API'}
+                      )
+                    </span>
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                      Endpoint URL da API
+                      {settings.providerType === 'greenapi' ? 'API URL da GREEN-API' : 'Endpoint URL da API'}
                     </label>
                     <input
                       type="url"
                       value={settings.providerEndpoint || ''}
                       onChange={(e) => setSettings({ ...settings, providerEndpoint: e.target.value })}
-                      placeholder={settings.providerType === 'evolution' ? 'https://sua-evolution-api.com' : 'https://api.z-api.io'}
+                      placeholder={
+                        settings.providerType === 'greenapi'
+                          ? 'https://7107.api.greenapi.com'
+                          : settings.providerType === 'evolution'
+                          ? 'https://sua-evolution-api.com'
+                          : 'https://api.z-api.io'
+                      }
                       className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-amber-500/40"
                     />
+                    {settings.providerType === 'greenapi' && (
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 block">
+                        Exemplo oficial da conta Developer: <code>https://7107.api.greenapi.com</code>
+                      </span>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                        Nome da Instância (Instance Name / ID)
+                        {settings.providerType === 'greenapi'
+                          ? 'ID da Instância (idInstance)'
+                          : 'Nome da Instância (Instance Name / ID)'}
                       </label>
                       <input
                         type="text"
                         value={settings.providerInstanceName || ''}
                         onChange={(e) => setSettings({ ...settings, providerInstanceName: e.target.value })}
-                        placeholder="igead_oficial"
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-amber-500/40"
+                        placeholder={settings.providerType === 'greenapi' ? '710722790899' : 'igead_oficial'}
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 font-mono outline-none focus:ring-2 focus:ring-amber-500/40"
                       />
                     </div>
 
                     <div>
                       <label className="block text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">
-                        {settings.providerType === 'evolution' ? 'Chave de API (apikey)' : 'Token da Instância'}
+                        {settings.providerType === 'greenapi'
+                          ? 'Token da Instância (apiTokenInstance)'
+                          : settings.providerType === 'evolution'
+                          ? 'Chave de API (apikey)'
+                          : 'Token da Instância'}
                       </label>
                       <input
                         type="password"
@@ -724,8 +749,12 @@ CREATE POLICY "Acesso restrito ao administrador whatsapp_message_history"
                             providerToken: e.target.value
                           })
                         }
-                        placeholder="••••••••••••••••"
-                        className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-amber-500/40"
+                        placeholder={
+                          settings.providerType === 'greenapi'
+                            ? 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8'
+                            : '••••••••••••••••'
+                        }
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 font-mono outline-none focus:ring-2 focus:ring-amber-500/40"
                       />
                     </div>
                   </div>
@@ -848,7 +877,7 @@ CREATE POLICY "Acesso restrito ao administrador whatsapp_message_history"
                       type="text"
                       value={settings.targetGroupId}
                       onChange={(e) => setSettings({ ...settings, targetGroupId: e.target.value })}
-                      placeholder="Ex: 120363049182394@g.us"
+                      placeholder="Ex: 120363361678530962@g.us"
                       className="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-mono outline-none focus:ring-2 focus:ring-amber-500/40"
                     />
                   </div>

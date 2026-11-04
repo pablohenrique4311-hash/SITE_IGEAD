@@ -154,11 +154,12 @@ export class EvolutionApiWhatsAppProvider implements IWhatsAppProvider {
   ): Promise<WhatsAppSendResult> {
     const baseUrl = this.cleanEndpoint(config?.endpoint);
     const instance = config?.instanceName || 'igead_oficial';
+    const apiKey = config?.apiKey || (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_EVOLUTION_API_KEY || '';
 
-    if (!baseUrl || !config?.apiKey) {
+    if (!baseUrl || !apiKey) {
       return {
         success: false,
-        error: 'Credenciais da Evolution API não informadas nas configurações.'
+        error: 'Credenciais da Evolution API não informadas (Endpoint URL ou Chave de API apikey ausente).'
       };
     }
 
@@ -175,29 +176,37 @@ export class EvolutionApiWhatsAppProvider implements IWhatsAppProvider {
 
       const res = await fetch(`${baseUrl}/message/sendText/${instance}`, {
         method: 'POST',
-        headers: this.getHeaders(config),
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: apiKey
+        },
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (res.ok && (data?.key?.id || data?.id)) {
+      if (res.ok && (data?.key?.id || data?.id || data?.messageId || data?.status === 'PENDING' || data?.status === 'SUCCESS')) {
         return {
           success: true,
-          providerMessageId: data.key?.id || data.id,
+          providerMessageId: String(data?.key?.id || data?.id || data?.messageId || `EVOLUTION_${Date.now()}`),
           sentAt: new Date().toISOString(),
           isSimulated: false
         };
       }
 
+      const errorDetail =
+        data?.response?.message ||
+        data?.message ||
+        (Array.isArray(data?.response?.message) ? data.response.message.join(', ') : `HTTP ${res.status}`);
+
       return {
         success: false,
-        error: data?.response?.message || data?.message || `Falha no envio (HTTP ${res.status})`
+        error: `Evolution API retornou erro: ${errorDetail}`
       };
     } catch (err) {
       return {
         success: false,
-        error: `Erro ao enviar via Evolution API: ${(err as Error).message}`
+        error: `Erro ao enviar via Evolution API (${baseUrl}/message/sendText/${instance}): ${(err as Error).message}`
       };
     }
   }

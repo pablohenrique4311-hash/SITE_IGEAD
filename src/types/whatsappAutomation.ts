@@ -2,7 +2,7 @@
  * Tipos e Interfaces para a Automação da Palavra do Dia no WhatsApp — IGEAD-MT
  */
 
-export type WhatsAppProviderType = 'simulation' | 'evolution' | 'zapi';
+export type WhatsAppProviderType = 'greenapi' | 'evolution' | 'zapi' | 'simulation';
 
 export type WhatsAppConnectionState = 'connected' | 'connecting' | 'disconnected' | 'simulated';
 

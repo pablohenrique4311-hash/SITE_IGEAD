@@ -51,13 +51,13 @@ export const DEFAULT_SETTINGS: WhatsAppAutomationSettings = {
   isEnabled: false,
   scheduledTime: '07:00',
   timezone: 'America/Cuiaba',
-  targetGroupId: '120363049182394@g.us',
+  targetGroupId: '120363361678530962@g.us',
   targetGroupName: 'IGEAD-MT • Grupo Oficial da Igreja',
-  providerType: 'simulation',
-  providerEndpoint: 'https://api.evolution.exemplo.com',
-  providerInstanceName: 'igead_business',
-  providerApiKey: '',
-  providerToken: '',
+  providerType: 'greenapi',
+  providerEndpoint: (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_GREEN_API_URL || 'https://7107.api.greenapi.com',
+  providerInstanceName: (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_GREEN_API_INSTANCE_ID || '710722790899',
+  providerApiKey: (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_GREEN_API_TOKEN || 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8',
+  providerToken: (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_GREEN_API_TOKEN || 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8',
   lastSentAt: null,
   lastError: null,
   updatedAt: new Date().toISOString()
@@ -278,16 +278,14 @@ class WhatsAppAutomationService {
   }
 
   /**
-   * Dispara um envio de teste imediato da Palavra do Dia para o grupo configurado
+   * Dispara um envio de teste imediato da Palavra do Dia para o grupo configurado via Evolution API
    */
   async sendTestMessage(customTargetGroupId?: string): Promise<WhatsAppSendResult> {
     await assertAuthorizedAdmin('disparar teste imediato de mensagem');
 
     const settings = await this.getSettings();
-    const provider = WhatsAppProviderFactory.getProvider(settings.providerType);
-    const config = this.getProviderConfig(settings);
+    const targetGroupId = (customTargetGroupId || settings.targetGroupId || '120363361678530962@g.us').trim();
 
-    const targetGroupId = customTargetGroupId || settings.targetGroupId;
     if (!targetGroupId) {
       return {
         success: false,
@@ -298,31 +296,68 @@ class WhatsAppAutomationService {
     const dailyWord = await getDailyWord();
     const formattedText = formatWhatsAppDailyMessage(dailyWord);
 
-    const result = await provider.sendGroupMessage(targetGroupId, formattedText, config);
+    let result: WhatsAppSendResult = { success: false, error: 'Falha inicial no envio' };
+    let handledByEdge = false;
 
-    // Registra no histórico
-    const historyItem: WhatsAppMessageHistoryItem = {
-      id: `hist_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      dailyWordDate: dailyWord.date,
-      groupId: targetGroupId,
-      groupName: settings.targetGroupName,
-      verseReference: dailyWord.reference,
-      verseText: dailyWord.verseText,
-      reflectionText: dailyWord.reflection,
-      formattedMessage: formattedText,
-      status: result.success ? 'sent' : 'failed',
-      attempts: 1,
-      sentAt: new Date().toISOString(),
-      providerType: settings.providerType,
-      providerMessageId: result.providerMessageId,
-      errorMessage: result.error,
-      isSimulated: Boolean(result.isSimulated || provider.isSimulation)
-    };
+    // 1. Tenta invocar a Edge Function do Supabase (que executa no backend com as variáveis de ambiente)
+    try {
+      const { data, error } = await supabase.functions.invoke('whatsapp-daily-word', {
+        body: {
+          isTest: true,
+          targetGroupId,
+          providerType: settings.providerType,
+          providerEndpoint: settings.providerEndpoint,
+          providerApiKey: settings.providerApiKey,
+          instanceName: settings.providerInstanceName
+        }
+      });
 
-    await this.recordHistory(historyItem);
+      if (!error && data) {
+        handledByEdge = true;
+        result = {
+          success: Boolean(data.success),
+          providerMessageId: data.sendResult?.providerMessageId || data.providerMessageId || data.historyId,
+          sentAt: new Date().toISOString(),
+          error: data.success ? undefined : (data.sendResult?.error || data.error || 'Falha no envio via WhatsApp Gateway'),
+          isSimulated: false
+        };
+      }
+    } catch (edgeInvokeErr) {
+      console.info('[WhatsApp Automation] Fallback para envio direto:', edgeInvokeErr);
+    }
 
+    // 2. Se a Edge Function não estava disponível no ambiente ou falhou na rede, executa o disparo direto via Provedor Ativo (GREEN-API)
+    if (!handledByEdge) {
+      const provider = WhatsAppProviderFactory.getProvider(settings.providerType || 'greenapi');
+      const config = this.getProviderConfig(settings);
+
+      result = await provider.sendGroupMessage(targetGroupId, formattedText, config);
+
+      // Registra o status detalhado na tabela whatsapp_message_history
+      const historyItem: WhatsAppMessageHistoryItem = {
+        id: `hist_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        dailyWordDate: dailyWord.date,
+        groupId: targetGroupId,
+        groupName: settings.targetGroupName,
+        verseReference: dailyWord.reference,
+        verseText: dailyWord.verseText,
+        reflectionText: dailyWord.reflection,
+        formattedMessage: formattedText,
+        status: result.success ? 'sent' : 'failed',
+        attempts: 1,
+        sentAt: new Date().toISOString(),
+        providerType: settings.providerType || 'greenapi',
+        providerMessageId: result.providerMessageId || null,
+        errorMessage: result.error || null,
+        isSimulated: Boolean(result.isSimulated || provider.isSimulation)
+      };
+
+      await this.recordHistory(historyItem);
+    }
+
+    // 3. Atualiza os metadados de último envio/erro nas configurações
     if (result.success) {
-      settings.lastSentAt = historyItem.sentAt;
+      settings.lastSentAt = new Date().toISOString();
       settings.lastError = null;
       await this.saveSettings(settings);
     } else {
