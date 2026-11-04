@@ -1,4 +1,4 @@
-const CACHE_NAME = 'igead-pwa-v2';
+const CACHE_NAME = 'igead-pwa-v3';
 
 // Recursos estáticos fundamentais para pré-carregamento offline
 const PRECACHE_URLS = [

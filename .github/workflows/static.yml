@@ -35,6 +35,8 @@ jobs:
 
       - name: Build Vite
         run: npm run build
+        env:
+          VITE_BASE_PATH: '/SITE_IGEAD/'
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

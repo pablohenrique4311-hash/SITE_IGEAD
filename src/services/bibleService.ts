@@ -190,13 +190,16 @@ async function loadBibleDataset(translation: BibleTranslationId): Promise<RawBib
   const fileName = translation === 'jfa' ? 'pt_acf.json' : 'en_kjv.json';
 
   const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
-  const candidateUrls: string[] = [];
+  const rawBase = import.meta.env.BASE_URL || '/';
+  const cleanBase = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+  const candidateUrls: string[] = [
+    `${cleanBase}data/${fileName}`,
+    `./data/${fileName}`,
+    `/data/${fileName}`
+  ];
   if (origin) {
+    candidateUrls.push(`${origin}${cleanBase}data/${fileName}`);
     candidateUrls.push(`${origin}/data/${fileName}`);
-  }
-  // Suporte a caminho relativo local no navegador
-  if (typeof window !== 'undefined') {
-    candidateUrls.push(`/data/${fileName}`);
   }
   // CDN público oficial como garantia infalível
   candidateUrls.push(`https://raw.githubusercontent.com/thiagobodruk/bible/master/json/${fileName}`);
