@@ -90,7 +90,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* SEÇÃO 3: VERSÍCULO DO DIA */}
-      <VerseOfTheDay onOpenBible={(bookId, chapter) => onNavigate('bible', bookId, chapter)} />
+      <VerseOfTheDay
+        onOpenBible={(bookId, chapter) => onNavigate('bible', bookId, chapter)}
+        onOpenAdminAutomation={() => onNavigate('admin')}
+      />
 
       {/* SEÇÃO 4: SEIS VÍDEOS MAIS RECENTES DO YOUTUBE */}
       <LatestVideos

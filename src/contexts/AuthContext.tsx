@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import { isAuthorizedWhatsAppAdmin } from '../constants/authConfig';
 
 export interface AuthContextType {
   user: User | null;
@@ -10,6 +11,7 @@ export interface AuthContextType {
   authModalTab: 'login' | 'register';
   displayName: string;
   firstName: string;
+  isWhatsAppAdmin: boolean;
   openLogin: () => void;
   openRegister: () => void;
   closeAuthModal: () => void;
@@ -184,6 +186,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Verifica se o usuário autenticado é o administrador autorizado do WhatsApp
+  const isWhatsAppAdmin = useMemo(() => isAuthorizedWhatsAppAdmin(user), [user]);
+
   const value = useMemo(
     () => ({
       user,
@@ -193,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       authModalTab,
       displayName,
       firstName,
+      isWhatsAppAdmin,
       openLogin,
       openRegister,
       closeAuthModal,
@@ -201,7 +207,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signUp,
       signOut
     }),
-    [user, session, loading, isAuthModalOpen, authModalTab, displayName, firstName]
+    [user, session, loading, isAuthModalOpen, authModalTab, displayName, firstName, isWhatsAppAdmin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

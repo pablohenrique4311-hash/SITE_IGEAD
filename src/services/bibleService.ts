@@ -190,7 +190,7 @@ async function loadBibleDataset(translation: BibleTranslationId): Promise<RawBib
   const fileName = translation === 'jfa' ? 'pt_acf.json' : 'en_kjv.json';
 
   const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
-  const rawBase = import.meta.env.BASE_URL || '/';
+  const rawBase = (import.meta as unknown as { env?: Record<string, string> })?.env?.BASE_URL || '/';
   const cleanBase = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   const candidateUrls: string[] = [
     `${cleanBase}data/${fileName}`,

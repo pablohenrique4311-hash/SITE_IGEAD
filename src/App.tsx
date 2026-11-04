@@ -16,6 +16,7 @@ import { checkLiveStream, getLatestVideos } from './services/youtubeService';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthScreen } from './components/AuthScreen';
 import { SplashScreen } from './components/SplashScreen';
+import { WhatsAppAutomationPanel } from './components/WhatsAppAutomationPanel';
 
 /**
  * Conteúdo principal autenticado da aplicação IGEAD-MT
@@ -26,12 +27,25 @@ interface AuthenticatedAppProps {
 }
 
 const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleTheme }) => {
+  const { isWhatsAppAdmin } = useAuth();
+
   // 1. NAVEGAÇÃO ENTRE PÁGINAS
   const [currentPage, setCurrentPage] = useState<PageId>('home');
   const [bibleInitialBook, setBibleInitialBook] = useState<string | undefined>(undefined);
   const [bibleInitialChapter, setBibleInitialChapter] = useState<number | undefined>(undefined);
 
+  // Redireciona para início se o usuário tentar acessar 'admin' sem autorização
+  useEffect(() => {
+    if (currentPage === 'admin' && !isWhatsAppAdmin) {
+      setCurrentPage('home');
+    }
+  }, [currentPage, isWhatsAppAdmin]);
+
   const navigateTo = (page: PageId, bookId?: string, chapter?: number) => {
+    if (page === 'admin' && !isWhatsAppAdmin) {
+      setCurrentPage('home');
+      return;
+    }
     setBibleInitialBook(bookId);
     setBibleInitialChapter(chapter);
     setCurrentPage(page);
@@ -131,6 +145,10 @@ const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleThe
         {currentPage === 'giving' && <GivingSection />}
 
         {currentPage === 'about' && <AboutSection />}
+
+        {currentPage === 'admin' && isWhatsAppAdmin && (
+          <WhatsAppAutomationPanel onBackToHome={() => navigateTo('home')} />
+        )}
       </main>
 
       {/* Rodapé com Identificação da Igreja e Navegação Completa */}

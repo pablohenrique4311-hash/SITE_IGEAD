@@ -10,7 +10,8 @@ import {
   Instagram,
   HeartHandshake,
   LogOut,
-  Download
+  Download,
+  MessageCircle
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { ChurchLogo } from './ChurchLogo';
@@ -19,7 +20,7 @@ import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useAuth } from '../contexts/AuthContext';
 import { NotificationBanner } from './NotificationBanner';
 
-export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'giving' | 'about';
+export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'giving' | 'about' | 'admin';
 
 interface HeaderProps {
   currentPage: PageId;
@@ -38,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
-  const { user, firstName, displayName, signOut } = useAuth();
+  const { user, firstName, displayName, signOut, isWhatsAppAdmin } = useAuth();
 
   const navItems: { id: PageId; label: string; icon: React.ReactNode }[] = [
     { id: 'home', label: 'Início', icon: null },
@@ -193,9 +194,27 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {/* Nome do usuário */}
-                <span className="text-xs font-bold truncate max-w-[90px] 2xl:max-w-[120px]" title={displayName || firstName}>
+                <span className="text-xs font-bold truncate max-w-[80px] 2xl:max-w-[110px]" title={displayName || firstName}>
                   {firstName || 'Membro'}
                 </span>
+
+                {/* Botão Atalho Painel de Automação WhatsApp (Apenas para o administrador autorizado) */}
+                {isWhatsAppAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => handleNavClick('admin')}
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                      currentPage === 'admin'
+                        ? 'bg-amber-600 text-white shadow-2xs font-bold'
+                        : 'text-zinc-700 dark:text-zinc-200 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-white dark:hover:bg-zinc-800'
+                    }`}
+                    title="Painel de Automação do WhatsApp"
+                    aria-label="Automação do WhatsApp"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-[11px] hidden 2xl:inline">Automação</span>
+                  </button>
+                )}
 
                 {/* Botão Sair / Logout */}
                 <button
@@ -265,6 +284,32 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Sair</span>
             </button>
           </div>
+
+          {/* Atalho Rápido para o Painel de Automação do WhatsApp (Apenas para o administrador autorizado) */}
+          {isWhatsAppAdmin && (
+            <button
+              type="button"
+              onClick={() => handleNavClick('admin')}
+              className={`w-full mb-3 flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                currentPage === 'admin'
+                  ? 'bg-amber-500/15 border-amber-500/35 text-amber-900 dark:text-amber-200 shadow-2xs font-bold'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/15 border-emerald-500/25 text-emerald-900 dark:text-emerald-200'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <MessageCircle className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-bold">Automação WhatsApp</div>
+                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400">Publicação diária da Palavra no grupo</div>
+                </div>
+              </div>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                Painel
+              </span>
+            </button>
+          )}
 
           {/* Lista de Navegação Mobile */}
           <nav className="flex flex-col gap-1" aria-label="Menu móvel">
