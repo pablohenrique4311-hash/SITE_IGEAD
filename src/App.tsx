@@ -110,16 +110,14 @@ const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleThe
         )}
 
         {currentPage === 'videos' && (
-          <div className="py-6">
-            <LatestVideos
-              videos={videos}
-              isLoading={isVideosLoading}
-              onRefresh={() => {
-                refreshVideosList(true);
-                refreshLiveStatus(true);
-              }}
-            />
-          </div>
+          <LatestVideos
+            videos={videos}
+            isLoading={isVideosLoading}
+            onRefresh={() => {
+              refreshVideosList(true);
+              refreshLiveStatus(true);
+            }}
+          />
         )}
 
         {currentPage === 'agenda' && <EventsSection />}
@@ -184,6 +182,23 @@ const AppRoot: React.FC = () => {
   const toggleTheme = () => {
     setIsDark((prev) => !prev);
   };
+
+  // Garante que, ao autenticar com sucesso, qualquer foco residual em campos do formulário
+  // seja removido, a rolagem volte ao topo e a escala do viewport retorne a 100% (evita zoom do Safari)
+  useEffect(() => {
+    if (user) {
+      if (document.activeElement && 'blur' in document.activeElement) {
+        (document.activeElement as HTMLElement).blur();
+      }
+      window.scrollTo(0, 0);
+
+      // Reafirma a meta viewport para escala normal 1.0 sem travar zoom manual de acessibilidade
+      const viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (viewportMeta) {
+        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+      }
+    }
+  }, [user]);
 
   // 1. Estado de Carregamento Inicial: Splash Screen suave sem flicker
   if (loading) {

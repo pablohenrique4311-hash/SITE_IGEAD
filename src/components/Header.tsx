@@ -77,7 +77,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 pt-[env(safe-area-inset-top,0px)] shadow-xs">
+      <header
+        style={{ paddingTop: 'var(--header-safe-top)' }}
+        className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 shadow-xs"
+      >
         <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 w-full">
           
@@ -233,7 +236,10 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* GAVETA / MENU MOBILE E TABLETS (< 1280px) RETRÁTIL */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl px-4 pt-3 pb-8 shadow-2xl animate-in slide-in-from-top duration-200 max-h-[calc(100vh-4rem-env(safe-area-inset-top,0px))] sm:max-h-[calc(100vh-5rem-env(safe-area-inset-top,0px))] overflow-y-auto">
+        <div
+          style={{ maxHeight: 'calc(100vh - var(--header-total-height))' }}
+          className="xl:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl px-4 pt-3 pb-8 shadow-2xl animate-in slide-in-from-top duration-200 overflow-y-auto"
+        >
           {/* Card do Usuário Logado (Perfil Completo no Mobile) */}
           <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -348,9 +354,10 @@ export const Header: React.FC<HeaderProps> = ({
       )}
     </header>
 
-    {/* Espaçador para compensar exatamente o cabeçalho fixo e garantir que o topo do conteúdo nunca fique oculto */}
+    {/* Espaçador que reserva fisicamente a altura total do cabeçalho fixo (incluindo safe-area) */}
     <div
-      className="h-16 sm:h-20 w-full shrink-0 pt-[env(safe-area-inset-top,0px)] pointer-events-none select-none"
+      className="w-full shrink-0 pointer-events-none select-none"
+      style={{ height: 'var(--header-total-height)' }}
       aria-hidden="true"
     />
   </>

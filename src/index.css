@@ -2,9 +2,42 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  /* Variáveis de cálculo exato da altura do cabeçalho e Safe Area */
+  --header-safe-top: env(safe-area-inset-top, 0px);
+  --header-nav-height: 4rem; /* 64px no mobile */
+  --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top));
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-nav-height: 5rem; /* 80px em tablets e desktop */
+    --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top));
+  }
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Previne rolagem horizontal em dispositivos móveis */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Compensa âncoras para não ficarem ocultas pelo cabeçalho fixo */
+  html {
+    scroll-padding-top: var(--header-total-height);
+  }
+
+  /* Previne zoom automático do iOS Safari em inputs em smartphones (< 768px) */
+  @media screen and (max-width: 767px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }
 

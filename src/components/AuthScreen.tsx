@@ -57,6 +57,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    // Desfoca o campo ativo no mobile para fechar o teclado virtual do iOS e prevenir zoom retido
+    if (document.activeElement && 'blur' in document.activeElement) {
+      (document.activeElement as HTMLElement).blur();
+    }
+
     if (!email.trim()) {
       setErrorMessage('Por favor, informe seu endereço de e-mail.');
       return;
@@ -85,6 +90,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
+
+    // Desfoca o campo ativo no mobile para fechar o teclado virtual do iOS e prevenir zoom retido
+    if (document.activeElement && 'blur' in document.activeElement) {
+      (document.activeElement as HTMLElement).blur();
+    }
 
     if (!fullName.trim()) {
       setErrorMessage('Por favor, informe seu nome completo.');
@@ -233,7 +243,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu.email@exemplo.com"
                       autoComplete="email"
-                      className="w-full pl-10 pr-3.5 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                     />
                   </div>
                 </div>
@@ -251,7 +261,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       autoComplete="current-password"
-                      className="w-full pl-10 pr-10 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                      className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                     />
                     <button
                       type="button"
@@ -311,7 +321,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Ex: João da Silva"
                       autoComplete="name"
-                      className="w-full pl-10 pr-3.5 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                     />
                   </div>
                 </div>
@@ -329,7 +339,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu.email@exemplo.com"
                       autoComplete="email"
-                      className="w-full pl-10 pr-3.5 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                     />
                   </div>
                 </div>
@@ -348,7 +358,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••"
                         autoComplete="new-password"
-                        className="w-full pl-10 pr-10 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                        className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                       />
                       <button
                         type="button"
@@ -374,7 +384,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ isDark, onToggleTheme })
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="••••••"
                         autoComplete="new-password"
-                        className="w-full pl-10 pr-10 py-3 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
+                        className="w-full pl-10 pr-10 py-3 text-base sm:text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
                       />
                       <button
                         type="button"
