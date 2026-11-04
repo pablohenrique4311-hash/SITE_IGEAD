@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_automation_settings (
   target_group_name TEXT NOT NULL DEFAULT 'IGEAD-MT • Grupo Oficial da Igreja',
   provider_type TEXT NOT NULL DEFAULT 'greenapi', -- 'greenapi' | 'evolution' | 'zapi' | 'simulation'
   provider_endpoint TEXT DEFAULT 'https://7107.api.greenapi.com',
-  provider_instance_name TEXT DEFAULT '710722790899',
+  provider_instance_name TEXT DEFAULT '',
   provider_api_key TEXT,
-  provider_token TEXT DEFAULT 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8',
+  provider_token TEXT,
   last_sent_at TIMESTAMPTZ,
   last_error TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
@@ -26,7 +26,7 @@ INSERT INTO public.whatsapp_automation_settings (
   id, is_enabled, scheduled_time, timezone, target_group_id, target_group_name, provider_type, provider_endpoint, provider_instance_name, provider_token
 )
 VALUES (
-  'default', false, '07:00', 'America/Cuiaba', '120363361678530962@g.us', 'IGEAD-MT • Grupo Oficial da Igreja', 'greenapi', 'https://7107.api.greenapi.com', '710722790899', 'dcdbfe8720b844619359f2ecf8138491768d407aace44835b8'
+  'default', false, '07:00', 'America/Cuiaba', '120363361678530962@g.us', 'IGEAD-MT • Grupo Oficial da Igreja', 'greenapi', 'https://7107.api.greenapi.com', '', ''
 )
 ON CONFLICT (id) DO UPDATE SET
   target_group_id = EXCLUDED.target_group_id,

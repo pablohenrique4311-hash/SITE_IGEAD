@@ -4,7 +4,8 @@
  * sem abrir janelas ou redirecionar a tela do membro.
  */
 
-import { CHURCH_INFO } from '../constants/churchInfo';
+import { supabase } from '../lib/supabaseClient';
+import { clearLegacyPrivateStorage } from '../lib/privateStorage';
 
 export interface PrayerRequestData {
   name: string;
@@ -40,88 +41,28 @@ export function formatPrayerMessage(data: PrayerRequestData): string {
   ].join('\n');
 }
 
-/**
- * Salva localmente o histórico do pedido no navegador para redundância
- */
-export function savePrayerLocally(data: PrayerRequestData) {
-  try {
-    const existingRaw = localStorage.getItem('igead_prayer_requests');
-    const existing = existingRaw ? JSON.parse(existingRaw) : [];
-    existing.unshift({
-      ...data,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    });
-    // Guarda os últimos 30 pedidos localmente
-    localStorage.setItem('igead_prayer_requests', JSON.stringify(existing.slice(0, 30)));
-  } catch (err) {
-    console.warn('[Prayer] Falha ao salvar pedido localmente:', err);
-  }
+/** Compatibilidade para remover registros legados; conteúdo nunca é persistido. */
+export function savePrayerLocally(_data: PrayerRequestData) {
+  clearLegacyPrivateStorage();
 }
 
-/**
- * Disparo em background silencioso:
- * 1. CallMeBot WhatsApp API (ou webhook configurado)
- * 2. FormSubmit AJAX para o e-mail oficial igrejageracaoeleita123@gmail.com
- * 3. Armazenamento local
- */
 export async function sendPrayerRequest(data: PrayerRequestData): Promise<{ success: boolean; message: string }> {
-  // Salva localmente imediatamente
-  savePrayerLocally(data);
-
-  const formattedMessage = formatPrayerMessage(data);
-  const targetPhone = CHURCH_INFO.phoneClean || '5565996443569';
-  const apiKey = (import.meta as unknown as { env?: Record<string, string> })?.env?.VITE_CALLMEBOT_API_KEY || '';
-
-  const promises: Promise<unknown>[] = [];
-
-  // 1. Disparo silencioso para WhatsApp via CallMeBot API (se apiKey disponível ou modo teste)
-  if (apiKey) {
-    const callMeBotUrl = `https://api.callmebot.com/whatsapp.php?phone=${targetPhone}&text=${encodeURIComponent(formattedMessage)}&apikey=${encodeURIComponent(apiKey)}`;
-    promises.push(
-      fetch(callMeBotUrl, { method: 'GET', mode: 'no-cors' }).catch((err) => {
-        console.warn('[Prayer] CallMeBot dispatch aviso:', err);
-      })
-    );
+  clearLegacyPrivateStorage();
+  if (!data.name.trim() || data.name.trim().length > 120 || !data.message.trim() ||
+      data.message.trim().length > 4000 || (data.phone || '').length > 30 ||
+      !Object.hasOwn(PRAYER_CATEGORIES, data.category)) {
+    return { success: false, message: 'Revise o nome, a categoria e o pedido (até 4000 caracteres).' };
   }
-
-  // 2. Disparo silencioso paralelo para o e-mail oficial igrejageracaoeleita123@gmail.com
-  const emailPayload = {
-    _subject: `🕊️ Novo Pedido de Oração - IGEAD-MT (${data.name})`,
-    Nome: data.name,
-    Contato: data.phone || 'Não informado',
-    Área: PRAYER_CATEGORIES[data.category] || data.category,
-    Confidencial: data.isConfidential ? 'Sim (Apenas Pastores)' : 'Não',
-    Motivo: data.message,
-    Data: new Date().toLocaleString('pt-BR'),
-    _template: 'table'
-  };
-
-  promises.push(
-    fetch(`https://formsubmit.co/ajax/${CHURCH_INFO.email}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: JSON.stringify(emailPayload)
-    }).catch((err) => {
-      console.warn('[Prayer] Email redundancy aviso:', err);
-    })
-  );
-
-  // Aguarda as tentativas com timeout seguro de 4 segundos para não travar a interface
   try {
-    await Promise.race([
-      Promise.allSettled(promises),
-      new Promise((resolve) => setTimeout(resolve, 3500))
-    ]);
+    const { data: id, error } = await supabase.rpc('submit_prayer_request', {
+      p_name: data.name.trim(), p_phone: data.phone?.trim() || '',
+      p_category: data.category, p_message: data.message.trim(), p_confidential: data.isConfidential,
+    }).abortSignal(AbortSignal.timeout(8000));
+    if (error || typeof id !== 'string') {
+      return { success: false, message: 'Não foi possível confirmar o registro. Aguarde antes de tentar novamente.' };
+    }
+    return { success: true, message: 'Pedido recebido e registrado para consulta pastoral. Isso não confirma leitura ou entrega por WhatsApp.' };
   } catch {
-    // Continua para sempre confirmar ao membro que seu clamor foi registrado
+    return { success: false, message: 'Não foi possível confirmar o registro. Verifique sua conexão.' };
   }
-
-  return {
-    success: true,
-    message: 'Pedido enviado com sucesso! Nossa liderança pastoral e equipe de intercessão estarão clamando pela sua vida.'
-  };
 }

@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Artefatos locais de testes de navegador
+.playwright-mcp/
+playwright-report/
+test-results/

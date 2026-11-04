@@ -1,140 +1,55 @@
-const CACHE_NAME = 'igead-pwa-v3';
+const CACHE_NAME = 'igead-pwa-v4-public-only';
+const scopeUrl = new URL(self.registration.scope);
+const scoped = (path) => new URL(path, scopeUrl).href;
+const PRECACHE_URLS = ['', 'index.html', 'manifest.json', 'pwa-192x192.png', 'pwa-512x512.png',
+  'apple-touch-icon.png', 'data/pt_acf.json', 'data/en_kjv.json'];
 
-// Recursos estáticos fundamentais para pré-carregamento offline
-const PRECACHE_URLS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './pwa-192x192.png',
-  './pwa-512x512.png',
-  './apple-touch-icon.png',
-  './data/pt_acf.json',
-  './data/en_kjv.json',
-  './assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png',
-  './assets/aistudio/2026-01-24_122424.pdf_93f47d23.png'
-];
+function isPublicResource(url) {
+  if (url.origin !== scopeUrl.origin || url.search || url.hash) return false;
+  const root = scopeUrl.pathname;
+  if (!url.pathname.startsWith(root)) return false;
+  const path = url.pathname.slice(root.length);
+  return PRECACHE_URLS.includes(path) ||
+    /^assets\/[a-zA-Z0-9_./-]+\.(js|css|png|jpg|jpeg|svg|webp|ico|woff2?)$/.test(path);
+}
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      // Pré-carrega cada recurso de forma resiliente
-      return Promise.allSettled(
-        PRECACHE_URLS.map((url) =>
-          cache.add(url).catch((err) => {
-            console.warn('[PWA SW] Aviso ao pré-carregar:', url, err);
-          })
-        )
-      );
-    }).then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
+    await Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(scoped(url))));
+    await self.skipWaiting();
+  }));
 });
-
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    }).then(() => self.clients.claim())
-  );
+  event.waitUntil(caches.keys().then(async (names) => {
+    await Promise.all(names.filter((name) => name.startsWith('igead-') && name !== CACHE_NAME)
+      .map((name) => caches.delete(name)));
+    await self.clients.claim();
+  }));
 });
-
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-
-  // Apenas requisições GET são cacheadas
-  if (request.method !== 'GET') {
-    return;
-  }
-
-  const url = new URL(request.url);
-
-  // Ignora APIs dinâmicas externas (YouTube Data API, estatísticas em tempo real, etc.)
-  if (
-    (url.hostname.includes('googleapis.com') && !url.hostname.includes('fonts.googleapis.com')) ||
-    url.hostname.includes('youtube.com') ||
-    url.hostname.includes('googlevideo.com')
-  ) {
-    return;
-  }
-
-  // Módulos Vite e código-fonte em desenvolvimento: Sempre Network-First para evitar código obsoleto
-  if (
-    url.pathname.includes('/src/') ||
-    url.pathname.includes('/@vite/') ||
-    url.pathname.includes('/@fs/') ||
-    url.pathname.includes('/node_modules/')
-  ) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(request))
-    );
-    return;
-  }
-
-  // Navegação HTML: Network-first com fallback para index.html em cache offline
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request).then((cached) => {
-            if (cached) return cached;
-            return caches.match('./index.html') || caches.match('./');
-          });
-        })
-    );
-    return;
-  }
-
-  // Dados da Bíblia (JSON) e assets estáticos: Cache-first com revalidação em segundo plano
-  if (
-    url.pathname.endsWith('.json') ||
-    url.pathname.match(/\.(png|jpg|jpeg|svg|webp|ico|woff2?|css|js)$/i)
-  ) {
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Revalida em segundo plano quando conectado
-          fetch(request).then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse));
-            }
-          }).catch(() => {});
-          return cachedResponse;
-        }
-
-        return fetch(request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const copy = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-          }
-          return networkResponse;
-        });
-      })
-    );
-    return;
-  }
-
-  // Estratégia padrão: Network primeiro, com fallback para cache
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
+  const request = event.request;
+  // APIs, consultas autenticadas e outros domínios nunca passam pelo Cache Storage.
+  if (request.method !== 'GET' || request.headers.has('authorization') ||
+      !isPublicResource(new URL(request.url))) return;
+  event.respondWith((async () => {
+    try {
+      const response = await fetch(request);
+      if (response.ok && response.type !== 'opaque') {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      if (request.mode === 'navigate') {
+        const fallback = await cache.match(scoped('index.html')) || await cache.match(scoped(''));
+        if (fallback) return fallback;
+      }
+      return Response.error();
+    }
+  })());
 });
 
 // ==========================================

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Header, PageId } from './components/Header';
 import { HomePage } from './components/HomePage';
-import { BibleReader } from './components/BibleReader';
+const BibleReader = lazy(() => import('./components/BibleReader').then((m) => ({ default: m.BibleReader })));
+
 import { LatestVideos } from './components/LatestVideos';
 import { EventsSection } from './components/EventsSection';
 import { ContentSection } from './components/ContentSection';
@@ -16,7 +17,8 @@ import { checkLiveStream, getLatestVideos } from './services/youtubeService';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthScreen } from './components/AuthScreen';
 import { SplashScreen } from './components/SplashScreen';
-import { WhatsAppAutomationPanel } from './components/WhatsAppAutomationPanel';
+const WhatsAppAutomationPanel = lazy(() => import('./components/WhatsAppAutomationPanel').then((m) => ({ default: m.WhatsAppAutomationPanel })));
+
 
 /**
  * Conteúdo principal autenticado da aplicação IGEAD-MT
@@ -104,7 +106,7 @@ const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleThe
       />
 
       {/* Conteúdo da Página Ativa */}
-      <main className="flex-1">
+      <main className="flex-1"><Suspense fallback={<p role="status" className="p-6">Carregando…</p>}>
         {currentPage === 'home' && (
           <HomePage
             onNavigate={navigateTo}
@@ -149,7 +151,7 @@ const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleThe
         {currentPage === 'admin' && isWhatsAppAdmin && (
           <WhatsAppAutomationPanel onBackToHome={() => navigateTo('home')} />
         )}
-      </main>
+      </Suspense></main>
 
       {/* Rodapé com Identificação da Igreja e Navegação Completa */}
       <Footer onNavigate={navigateTo} />

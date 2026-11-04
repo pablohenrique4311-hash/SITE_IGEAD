@@ -9,8 +9,8 @@ import {
   getLatestVideos
 } from './youtubeService';
 
-test('Channel constants and permanent API key match user specification', () => {
-  assert.equal(API_KEY, 'AIzaSyDV754ROGEUEKioxFHGceXBV5PCIav-PMI');
+test('Channel configuration uses the church channel', () => {
+  assert.equal(typeof API_KEY, 'string');
   assert.equal(CHANNEL_ID, 'UCwWs_spTAEZaojGQDQSYQ-A');
   assert.equal(UPLOADS_PLAYLIST_ID, 'UUwWs_spTAEZaojGQDQSYQ-A');
   assert.equal(CHANNEL_URL, 'https://www.youtube.com/channel/UCwWs_spTAEZaojGQDQSYQ-A');
@@ -22,7 +22,16 @@ test('formatVideoDate formats ISO date to PT-BR correctly', () => {
   assert.ok(formatted.includes('outubro') || formatted.includes('Outubro'));
 });
 
-test('getLatestVideos returns official videos from YouTube API', async () => {
+test('getLatestVideos maps the provider response without a real API call', async (t) => {
+  t.mock.method(globalThis, 'fetch', async (url: RequestInfo | URL) => {
+    const request = new URL(String(url));
+    assert.equal(request.hostname, 'www.googleapis.com');
+    assert.equal(request.searchParams.get('playlistId'), UPLOADS_PLAYLIST_ID);
+    return new Response(JSON.stringify({ items: [{ snippet: {
+      resourceId: { videoId: 'video-fixture' }, title: 'Vídeo de teste',
+      description: 'Fixture sintética', publishedAt: '2026-10-23T23:23:18Z',
+    } }] }), { status: 200 });
+  });
   const videos = await getLatestVideos(8);
   assert.ok(Array.isArray(videos));
   assert.ok(videos.length > 0, 'Must return at least 1 video from the official channel');

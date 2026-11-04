@@ -1,25 +1,11 @@
-/**
- * Configurações de Autorização e Controle de Acesso — IGEAD-MT
- * Define o e-mail único autorizado para administração da Automação WhatsApp.
- */
+import { supabase } from '../lib/supabaseClient';
 
-export const AUTHORIZED_WHATSAPP_ADMIN_EMAIL = 'pablohenrique4311@gmail.com';
-
-/**
- * Valida com segurança se o usuário ou e-mail fornecido é o administrador oficial da automação.
- * A comparação é estrita, normalizada (lowercase e trim) e baseada no Supabase Auth.
- */
-export function isAuthorizedWhatsAppAdmin(
-  userOrEmail?: { email?: string | null } | string | null
-): boolean {
-  if (!userOrEmail) return false;
-
-  const email =
-    typeof userOrEmail === 'string'
-      ? userOrEmail
-      : userOrEmail.email;
-
-  if (!email || typeof email !== 'string') return false;
-
-  return email.trim().toLowerCase() === AUTHORIZED_WHATSAPP_ADMIN_EMAIL.toLowerCase();
+/** A interface consulta a decisão do banco; e-mail e metadados locais não concedem acesso. */
+export async function getWhatsAppAdminStatus(): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('is_whatsapp_admin');
+    return !error && data === true;
+  } catch {
+    return false;
+  }
 }

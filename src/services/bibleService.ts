@@ -208,14 +208,11 @@ async function loadBibleDataset(translation: BibleTranslationId): Promise<RawBib
   pendingFetchPromises[translation] = (async () => {
     for (const url of candidateUrls) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         const response = await fetch(url, {
-          signal: controller.signal,
+          signal: AbortSignal.timeout(10000),
           headers: { Accept: 'application/json' }
         });
-        clearTimeout(timeoutId);
 
         if (response.ok) {
           const data: RawBibleBookJson[] = await response.json();

@@ -1,4 +1,5 @@
-import test from 'node:test';
+import { readFile } from 'node:fs/promises';
+import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getAllBooks,
@@ -10,6 +11,16 @@ import {
   fetchChapterVerses
 } from './bibleService';
 import { BIBLE_BOOKS } from './bibleData';
+
+// A mesma base pública usada pelo navegador; nenhum acesso à CDN.
+test.beforeEach(() => {
+  mock.method(globalThis, 'fetch', async (url: RequestInfo | URL) => {
+    const filename = String(url).includes('en_kjv') ? 'en_kjv.json' : 'pt_acf.json';
+    const body = await readFile(new URL(`../../public/data/${filename}`, import.meta.url), 'utf8');
+    return new Response(body, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  });
+});
+test.afterEach(() => mock.restoreAll());
 
 test('Bible canon contains all 66 books', () => {
   const books = getAllBooks();

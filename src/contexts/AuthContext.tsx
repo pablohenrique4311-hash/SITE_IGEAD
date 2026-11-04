@@ -1,7 +1,8 @@
+import { getWhatsAppAdminStatus } from '../constants/authConfig';
+import { clearLegacyPrivateStorage } from '../lib/privateStorage';
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
-import { isAuthorizedWhatsAppAdmin } from '../constants/authConfig';
 
 export interface AuthContextType {
   user: User | null;
@@ -53,6 +54,7 @@ export function translateAuthError(error: Error | null | undefined): string {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isWhatsAppAdmin, setIsWhatsAppAdmin] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -175,19 +177,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    clearLegacyPrivateStorage();
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setUser(null);
       setSession(null);
     } catch (err) {
-      console.warn('[Supabase Auth] Erro ao sair da conta:', err);
-      setUser(null);
-      setSession(null);
+      throw new Error('Não foi possível encerrar a sessão. Tente novamente.');
     }
   };
 
-  // Verifica se o usuário autenticado é o administrador autorizado do WhatsApp
-  const isWhatsAppAdmin = useMemo(() => isAuthorizedWhatsAppAdmin(user), [user]);
+  useEffect(() => {
+    let active = true;
+    setIsWhatsAppAdmin(false);
+    if (user) {
+      getWhatsAppAdminStatus().then((authorized) => {
+        if (active) setIsWhatsAppAdmin(authorized);
+      });
+    }
+    return () => { active = false; };
+  }, [user]);
 
   const value = useMemo(
     () => ({

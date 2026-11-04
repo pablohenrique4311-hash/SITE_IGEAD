@@ -1,19 +1,24 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import {defineConfig} from 'vite';
+import { fileURLToPath } from 'node:url';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, isPreview, mode }) => {
   // Para GitHub Pages (/SITE_IGEAD/) em build de produção, ou configurável via VITE_BASE_PATH.
   // Em modo 'serve' (servidor de desenvolvimento local / AI Studio), roda na raiz '/' para responder na porta 3000.
-  const base = process.env.VITE_BASE_PATH || (command === 'build' ? '/SITE_IGEAD/' : '/');
+  const base = process.env.VITE_BASE_PATH || (command === 'build' || isPreview ? '/SITE_IGEAD/' : '/');
 
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  const publicKeys = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_YOUTUBE_API_KEY'];
   return {
     base,
+    // Publicar apenas configuração conhecida; variáveis antigas de gateways são ignoradas.
+    envPrefix: [],
+    define: Object.fromEntries(publicKeys.map((key) => [`import.meta.env.${key}`, JSON.stringify(env[key] || '')])),
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': fileURLToPath(new URL('.', import.meta.url)),
       },
     },
     server: {

@@ -1,44 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { EvolutionApiWhatsAppProvider } from './EvolutionApiProvider';
-import { formatWhatsAppDailyMessage } from '../dailyWordService';
+import { Gateway } from '../../../supabase/functions/_shared/gateway';
 
-test('EvolutionApiWhatsAppProvider conforms to Evolution API specifications', () => {
-  const provider = new EvolutionApiWhatsAppProvider();
-  assert.equal(provider.id, 'evolution');
-  assert.equal(provider.isSimulation, false);
-});
-
-test('EvolutionApiWhatsAppProvider valida obrigatoriedade de endpoint e apikey', async () => {
-  const provider = new EvolutionApiWhatsAppProvider();
-  const res = await provider.sendGroupMessage('120363361678530962@g.us', 'Mensagem de teste', {
-    endpoint: '',
-    apiKey: '',
-    instanceName: 'igead_oficial'
-  });
-
-  assert.equal(res.success, false);
-  assert.ok(res.error?.includes('Credenciais da Evolution API não informadas'));
-});
-
-test('Formatação da mensagem e JID do grupo oficial coincidem com especificação', () => {
-  const targetGroupId = '120363361678530962@g.us';
-  assert.ok(targetGroupId.endsWith('@g.us'));
-  assert.equal(targetGroupId, '120363361678530962@g.us');
-
-  const formatted = formatWhatsAppDailyMessage({
-    id: 'test_1',
-    date: '2026-11-04',
-    reference: 'Salmos 23:1',
-    bookName: 'Salmos',
-    chapter: 23,
-    verseNumber: 1,
-    verseText: 'O Senhor é o meu pastor; nada me faltará.',
-    reflection: 'Descanse sob o cuidado do Bom Pastor.',
-    translation: 'Almeida (JFA)'
-  });
-
-  assert.ok(formatted.includes('PALAVRA DO DIA — IGEAD-MT'));
-  assert.ok(formatted.includes('120363361678530962@g.us') === false); // não vaza jid na mensagem
-  assert.ok(formatted.includes('Salmos 23:1'));
+test('Evolution envia payload e apikey no servidor e exige ID do provedor', async () => {
+  const http: typeof fetch = async (url, init) => {
+    assert.equal(String(url), 'https://evolution.test/message/sendText/church');
+    assert.equal(new Headers(init?.headers).get('apikey'), 'synthetic');
+    assert.deepEqual(JSON.parse(String(init?.body)), { number: '12345@g.us', text: 'Sintética' });
+    return new Response('{"key":{"id":"evolution-message"}}');
+  };
+  const gateway = new Gateway({ type: 'evolution', endpoint: 'https://evolution.test', instance: 'church', token: 'synthetic', allowedOrigins: ['https://evolution.test'] }, http);
+  assert.equal((await gateway.send('12345@g.us', 'Sintética')).providerMessageId, 'evolution-message');
 });

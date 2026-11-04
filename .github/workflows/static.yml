@@ -1,51 +1,65 @@
-# Workflow para compilar Vite/React e publicar no GitHub Pages
-name: Deploy Vite to Pages
-
+name: Validate and deploy
 on:
+  pull_request:
   push:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  build-and-deploy:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: npm run check:functions
+      - name: Start isolated database
+        run: docker run --name igead-audit-postgres -e POSTGRES_PASSWORD=local-test-only -d postgres:16
+      - name: Wait for database
+        run: |
+          for attempt in $(seq 1 30); do
+            if docker exec igead-audit-postgres pg_isready -U postgres; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: npm run test:database
+      - if: always()
+        run: docker rm -f igead-audit-postgres
+      - run: npm run build
+        env:
+          VITE_BASE_PATH: /SITE_IGEAD/
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_YOUTUBE_API_KEY: ${{ vars.VITE_YOUTUBE_API_KEY }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run check:security
+      - run: npm run test:env
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Build Vite
-        run: npm run build
-        env:
-          VITE_BASE_PATH: '/SITE_IGEAD/'
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-      - name: Deploy to GitHub Pages
+      - uses: actions/deploy-pages@v4
         id: deployment
-        uses: actions/deploy-pages@v4

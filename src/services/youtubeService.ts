@@ -5,7 +5,7 @@
 
 import { YouTubeLiveStatus, YouTubeVideo } from '../types';
 
-export const API_KEY = "AIzaSyDV754ROGEUEKioxFHGceXBV5PCIav-PMI";
+export const API_KEY = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_YOUTUBE_API_KEY || '';
 export const CHANNEL_ID = "UCwWs_spTAEZaojGQDQSYQ-A";
 export const UPLOADS_PLAYLIST_ID = "UUwWs_spTAEZaojGQDQSYQ-A";
 export const CHANNEL_URL = `https://www.youtube.com/channel/${CHANNEL_ID}`;
@@ -45,11 +45,8 @@ export async function checkLiveStream(forceRefresh = false): Promise<YouTubeLive
       url.searchParams.set('key', API_KEY);
       url.searchParams.set('maxResults', '1');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(url.toString(), { signal: controller.signal });
-      clearTimeout(timeoutId);
+      const response = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) });
 
       if (!response.ok) {
         console.warn(`[YouTube API] Live check status: ${response.status}`);
@@ -129,11 +126,8 @@ export async function getLatestVideos(maxResults = 8, forceRefresh = false): Pro
       url.searchParams.set('maxResults', String(maxResults));
       url.searchParams.set('key', API_KEY);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-      const response = await fetch(url.toString(), { signal: controller.signal });
-      clearTimeout(timeoutId);
+      const response = await fetch(url.toString(), { signal: AbortSignal.timeout(10000) });
 
       if (!response.ok) {
         console.error(`[YouTube API] Falha ao consultar playlist de uploads (${response.status})`);

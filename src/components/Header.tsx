@@ -38,6 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   isLive
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState('');
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -97,13 +98,15 @@ export const Header: React.FC<HeaderProps> = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     setMobileMenuOpen(false);
-    signOut();
+    setSignOutError('');
+    try { await signOut(); } catch { setSignOutError('Não foi possível sair da conta. Tente novamente.'); }
   };
 
   return (
     <>
+      {signOutError && <p role="alert" className="fixed bottom-4 left-4 z-50 bg-red-700 text-white p-3 rounded-xl">{signOutError}</p>}
       <header
         style={{ paddingTop: 'var(--header-safe-top)' }}
         className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 shadow-xs [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-amber-500 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-amber-500"

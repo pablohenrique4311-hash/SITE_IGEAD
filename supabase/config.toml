@@ -1,0 +1,3 @@
+# O handler valida JWT de usuário com getUser e segredo próprio do cron.
+[functions.whatsapp-daily-word]
+verify_jwt = false

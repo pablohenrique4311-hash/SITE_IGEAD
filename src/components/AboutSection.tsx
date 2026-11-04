@@ -26,6 +26,7 @@ export const AboutSection: React.FC = () => {
   const [prayerMessage, setPrayerMessage] = useState('');
   const [isConfidential, setIsConfidential] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmitPrayer = async (e: React.FormEvent) => {
@@ -33,14 +34,20 @@ export const AboutSection: React.FC = () => {
     if (!prayerName.trim() || !prayerMessage.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
+    setSubmitError('');
     try {
-      await sendPrayerRequest({
+      const result = await sendPrayerRequest({
         name: prayerName,
         phone: prayerPhone,
         category: prayerCategory,
         message: prayerMessage,
         isConfidential
       });
+
+      if (!result.success) {
+        setSubmitError(result.message);
+        return;
+      }
 
       // Limpa os campos do formulário conforme solicitado
       setPrayerName('');
@@ -51,8 +58,7 @@ export const AboutSection: React.FC = () => {
 
       setIsSubmitted(true);
     } catch (err) {
-      console.warn('Erro ao enviar pedido de oração:', err);
-      setIsSubmitted(true);
+      setSubmitError('Não foi possível confirmar o registro. Tente novamente mais tarde.');
     } finally {
       setIsSubmitting(false);
     }
@@ -319,10 +325,10 @@ export const AboutSection: React.FC = () => {
               <div>
                 <div className="text-2xl select-none mb-1">🙏</div>
                 <h4 className="text-base sm:text-lg font-bold font-cinzel text-zinc-900 dark:text-zinc-50">
-                  Pedido enviado com sucesso!
+                  Pedido registrado com sucesso!
                 </h4>
                 <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mt-2 max-w-md mx-auto font-medium">
-                  Nossa liderança pastoral e equipe de intercessão estarão clamando pela sua vida.
+                  Seu pedido foi registrado para consulta pastoral.
                 </p>
               </div>
               <div className="pt-2">
@@ -339,7 +345,9 @@ export const AboutSection: React.FC = () => {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmitPrayer} className="space-y-4">
+            <>
+            {submitError && <p role="alert" className="text-red-600 mb-4">{submitError}</p>}
+              <form onSubmit={handleSubmitPrayer} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                   Seu Nome *
@@ -435,6 +443,7 @@ export const AboutSection: React.FC = () => {
                 )}
               </button>
             </form>
+            </>
           )}
         </div>
       </div>

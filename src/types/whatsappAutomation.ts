@@ -2,11 +2,11 @@
  * Tipos e Interfaces para a Automação da Palavra do Dia no WhatsApp — IGEAD-MT
  */
 
-export type WhatsAppProviderType = 'greenapi' | 'evolution' | 'zapi' | 'simulation';
+export type WhatsAppProviderType = 'greenapi' | 'evolution' | 'simulation';
 
 export type WhatsAppConnectionState = 'connected' | 'connecting' | 'disconnected' | 'simulated';
 
-export type WhatsAppQueueStatus = 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
+export type WhatsAppQueueStatus = 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled' | 'uncertain';
 
 export interface WhatsAppConnectionStatus {
   state: WhatsAppConnectionState;
@@ -42,11 +42,6 @@ export interface WhatsAppAutomationSettings {
   targetGroupId: string;
   targetGroupName: string;
   providerType: WhatsAppProviderType;
-  // Configurações do Provedor (armazenadas com segurança)
-  providerEndpoint?: string;
-  providerInstanceName?: string;
-  providerApiKey?: string;
-  providerToken?: string;
   // Metadados
   lastSentAt?: string | null;
   lastError?: string | null;
