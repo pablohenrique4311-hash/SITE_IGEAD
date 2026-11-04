@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Share2, Copy, Check, BookOpen } from 'lucide-react';
+import { NotificationBanner } from './NotificationBanner';
+import { checkAndTriggerDailyVerseNotification } from '../services/notificationService';
 
 interface VerseOfTheDayProps {
   onOpenBible?: (bookId: string, chapter: number) => void;
@@ -18,6 +20,11 @@ export const VerseOfTheDay: React.FC<VerseOfTheDayProps> = ({ onOpenBible }) => 
     text: 'E sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, daqueles que são chamados segundo o seu propósito.',
     translation: 'Almeida (JFA)'
   };
+
+  // Rotina diária: verifica e dispara a notificação do versículo do dia se ainda não exibida hoje
+  useEffect(() => {
+    checkAndTriggerDailyVerseNotification(verseData.text, verseData.reference);
+  }, [verseData.text, verseData.reference]);
 
   const handleCopy = async () => {
     const textToCopy = `"${verseData.text}" — ${verseData.reference} (${verseData.translation})\nIgreja Geração Eleita (IGEAD-MT)`;
@@ -48,7 +55,11 @@ export const VerseOfTheDay: React.FC<VerseOfTheDayProps> = ({ onOpenBible }) => 
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-8 px-4 sm:px-6">
+    <div className="max-w-4xl mx-auto my-8 px-4 sm:px-6 space-y-4">
+      {/* Banner Convite para Notificações Push do Versículo e Cultos */}
+      <NotificationBanner />
+
+      {/* Card Principal do Versículo do Dia */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 p-6 sm:p-8 backdrop-blur-xs shadow-xs">
         {/* Detalhe decorativo sutil */}
         <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>

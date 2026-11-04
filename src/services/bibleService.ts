@@ -76,44 +76,68 @@ export interface ParsedBibleReference {
   verse?: number;
 }
 
+export function normalizeClean(str: string): string {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
 export function parseBibleQuery(query: string): ParsedBibleReference | null {
   if (!query || !query.trim()) return null;
-  const clean = query.trim().toLowerCase();
+  const raw = query.trim();
+  const normalizedQuery = raw
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
 
-  // Expressão regular para referências bíblicas em português (ex: "joão 3:16", "salmos 23", "gn 1", "1 coríntios 13")
-  const match = clean.match(/^([0-9]?\s*[a-záàâãéèêíïóôõöúçñ]+)\s*(\d+)?(?::(\d+))?$/i);
-  if (!match) {
-    const bookOnly = BIBLE_BOOKS.find(
-      (b) =>
-        b.name.toLowerCase() === clean ||
-        b.abbreviation.toLowerCase() === clean ||
-        b.englishSlug.toLowerCase() === clean
-    );
-    if (bookOnly) {
-      return { book: bookOnly, chapter: 1 };
+  // Expressão regular: detecta nome/sigla do livro + capítulo opcional + versículo opcional
+  // Exemplos: "1 joao 3:16", "salmos 23", "gn 1", "mateus", "1corintios 13"
+  const match = normalizedQuery.match(/^([0-9]?\s*[a-z]+)\s*(\d+)?(?::(\d+))?$/i);
+  let rawBookPart = normalizedQuery;
+  let chapterNum = 1;
+  let verseNum: number | undefined;
+
+  if (match) {
+    rawBookPart = match[1].trim();
+    if (match[2]) {
+      chapterNum = parseInt(match[2], 10);
     }
-    return null;
+    if (match[3]) {
+      verseNum = parseInt(match[3], 10);
+    }
   }
 
-  const rawBookName = match[1].trim().replace(/\s+/g, '');
-  const chapterNum = match[2] ? parseInt(match[2], 10) : 1;
-  const verseNum = match[3] ? parseInt(match[3], 10) : undefined;
+  const cleanBookSearch = normalizeClean(rawBookPart);
+  if (!cleanBookSearch) return null;
 
-  const foundBook = BIBLE_BOOKS.find((b) => {
-    const bId = b.id.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const bAbbr = b.abbreviation.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const bName = b.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const bEng = b.englishSlug.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const cleanSearch = rawBookName.replace(/[^a-z0-9]/g, '');
+  // 1. Busca exata por ID, abreviação, nome ou slug em inglês
+  let foundBook = BIBLE_BOOKS.find((b) => {
+    const bId = normalizeClean(b.id);
+    const bAbbr = normalizeClean(b.abbreviation);
+    const bName = normalizeClean(b.name);
+    const bEng = normalizeClean(b.englishSlug);
+    const bEngName = normalizeClean(b.englishName);
 
     return (
-      bId === cleanSearch ||
-      bAbbr === cleanSearch ||
-      bName === cleanSearch ||
-      bEng === cleanSearch ||
-      bName.startsWith(cleanSearch)
+      bId === cleanBookSearch ||
+      bAbbr === cleanBookSearch ||
+      bName === cleanBookSearch ||
+      bEng === cleanBookSearch ||
+      bEngName === cleanBookSearch
     );
   });
+
+  // 2. Se não encontrou exato, busca por prefixo (ex: "mat" -> Mateus, "salm" -> Salmos, "gen" -> Gênesis)
+  if (!foundBook && cleanBookSearch.length >= 2) {
+    foundBook = BIBLE_BOOKS.find((b) => {
+      const bName = normalizeClean(b.name);
+      const bId = normalizeClean(b.id);
+      return bName.startsWith(cleanBookSearch) || bId.startsWith(cleanBookSearch);
+    });
+  }
 
   if (!foundBook) return null;
 
@@ -123,6 +147,29 @@ export function parseBibleQuery(query: string): ParsedBibleReference | null {
     chapter: validChapter,
     verse: verseNum
   };
+}
+
+export function searchBibleBooks(term: string): BibleBook[] {
+  if (!term || !term.trim()) return [];
+  const cleanTerm = normalizeClean(term);
+  if (!cleanTerm) return [];
+
+  return BIBLE_BOOKS.filter((b) => {
+    const bId = normalizeClean(b.id);
+    const bAbbr = normalizeClean(b.abbreviation);
+    const bName = normalizeClean(b.name);
+    const bEng = normalizeClean(b.englishName);
+    const bCategory = normalizeClean(b.category);
+
+    return (
+      bName.includes(cleanTerm) ||
+      bAbbr === cleanTerm ||
+      bAbbr.includes(cleanTerm) ||
+      bId.includes(cleanTerm) ||
+      bEng.includes(cleanTerm) ||
+      bCategory.includes(cleanTerm)
+    );
+  });
 }
 
 /**

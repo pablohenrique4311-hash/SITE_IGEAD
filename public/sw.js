@@ -136,3 +136,63 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(request))
   );
 });
+
+// ==========================================
+// SUPORTE A NOTIFICAÇÕES PUSH (WEB PUSH API)
+// ==========================================
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data = { body: event.data.text() };
+    }
+  }
+
+  const title = data.title || 'IGEAD-MT — Igreja Geração Eleita';
+  const options = {
+    body: data.body || 'Nova mensagem da Igreja Geração Eleita.',
+    icon: data.icon || './assets/aistudio/Logotipo_gera__o_eleita_a16b7b59.png',
+    badge: data.badge || './pwa-192x192.png',
+    data: {
+      url: data.url || './',
+      timestamp: Date.now(),
+      ...data
+    },
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'igead-notification',
+    renotify: true
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || './';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          client.navigate?.(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// Suporte a mensagens do cliente para disparo de notificação via Service Worker
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, options } = event.data;
+    self.registration.showNotification(title, options);
+  }
+});
+

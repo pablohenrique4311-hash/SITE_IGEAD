@@ -17,6 +17,7 @@ import { ChurchLogo } from './ChurchLogo';
 import { CHURCH_INFO } from '../constants/churchInfo';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useAuth } from '../contexts/AuthContext';
+import { NotificationBanner } from './NotificationBanner';
 
 export type PageId = 'home' | 'bible' | 'videos' | 'agenda' | 'content' | 'giving' | 'about';
 
@@ -75,46 +76,52 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 w-full">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 w-full">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 pt-[env(safe-area-inset-top,0px)] shadow-xs">
+        <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 w-full">
           
-          {/* LADO ESQUERDO: Logo e Título Oficial */}
-          <button
-            type="button"
-            onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2 sm:gap-3 text-left group cursor-pointer focus:outline-none min-w-0 shrink"
-            aria-label="Página inicial da IGEAD-MT"
-          >
-            <ChurchLogo size="md" className="group-hover:scale-105 shrink-0" />
+          {/* ========================================================
+              ÁREA 1 (ESQUERDA): Logo Oficial, Nome IGEAD-MT e Selo
+             ======================================================== */}
+          <div className="flex items-center shrink-0">
+            <button
+              type="button"
+              onClick={() => handleNavClick('home')}
+              className="flex items-center gap-2.5 sm:gap-3 text-left group cursor-pointer focus:outline-none shrink-0"
+              aria-label="Página inicial da IGEAD-MT"
+            >
+              <ChurchLogo size="md" className="group-hover:scale-105 shrink-0 transition-transform duration-200" />
 
-            <div className="flex flex-col justify-center min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-cinzel font-bold text-base sm:text-lg tracking-tight text-zinc-900 dark:text-zinc-50 whitespace-nowrap leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                  IGEAD-MT
-                </span>
-
-                <span className="hidden sm:inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap leading-none">
-                  Geração Eleita
-                </span>
-
-                {isLive && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap leading-none">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                    AO VIVO
+              <div className="flex flex-col justify-center shrink-0 leading-tight">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="font-cinzel font-bold text-base sm:text-lg tracking-tight text-zinc-900 dark:text-zinc-50 whitespace-nowrap group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    IGEAD-MT
                   </span>
-                )}
+
+                  <span className="hidden sm:inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap leading-none">
+                    Geração Eleita
+                  </span>
+
+                  {isLive && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap leading-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                      AO VIVO
+                    </span>
+                  )}
+                </div>
+
+                <span className="hidden 2xl:inline text-[11px] text-zinc-500 dark:text-zinc-400 font-medium whitespace-nowrap mt-0.5">
+                  Igreja Geração Eleita • Mato Grosso
+                </span>
               </div>
+            </button>
+          </div>
 
-              {/* Subtítulo institucional exibido a partir de telas médias para economizar espaço no mobile */}
-              <span className="hidden md:inline text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-normal whitespace-nowrap truncate">
-                Igreja Geração Eleita • Mato Grosso
-              </span>
-            </div>
-          </button>
-
-          {/* CENTRO: Menu de Navegação Horizontal (Desktop) */}
-          <nav className="hidden xl:flex items-center gap-1 2xl:gap-1.5 shrink-0" aria-label="Navegação principal">
+          {/* ========================================================
+              ÁREA 2 (CENTRO): Links de Navegação Horizontal (Desktop)
+             ======================================================== */}
+          <nav className="hidden xl:flex items-center justify-center gap-1 2xl:gap-1.5 shrink-0 px-2" aria-label="Navegação principal">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
               return (
@@ -122,9 +129,9 @@ export const Header: React.FC<HeaderProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => handleNavClick(item.id)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs 2xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 2xl:px-3 py-1.5 rounded-xl text-xs 2xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/20 shadow-2xs'
+                      ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/25 shadow-2xs'
                       : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
                   }`}
                   aria-current={isActive ? 'page' : undefined}
@@ -136,8 +143,10 @@ export const Header: React.FC<HeaderProps> = ({
             })}
           </nav>
 
-          {/* LADO DIREITO (DESKTOP): Tema, Instagram, Botão Verde WhatsApp, Perfil do Usuário */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
+          {/* ========================================================
+              ÁREA 3 (DIREITA - DESKTOP >= 1280px): Tema, Redes e Perfil
+             ======================================================== */}
+          <div className="hidden xl:flex items-center gap-2 2xl:gap-2.5 shrink-0">
             {/* 1. Botão de alternar Tema (Lua/Sol) */}
             <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0" />
 
@@ -158,7 +167,7 @@ export const Header: React.FC<HeaderProps> = ({
               href={CHURCH_INFO.whatsappGroupUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-xs hover:shadow-md transition-all whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-xs hover:shadow-md transition-all whitespace-nowrap shrink-0"
               title="Entrar no Grupo Oficial do WhatsApp da IGEAD-MT"
               aria-label="Grupo Oficial do WhatsApp"
             >
@@ -181,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 {/* Nome do usuário */}
-                <span className="text-xs font-bold truncate max-w-[110px]" title={displayName || firstName}>
+                <span className="text-xs font-bold truncate max-w-[90px] 2xl:max-w-[120px]" title={displayName || firstName}>
                   {firstName || 'Membro'}
                 </span>
 
@@ -200,8 +209,10 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* LADO DIREITO (MOBILE - SMARTPHONES): Apenas Tema (Lua/Sol) e Menu Hambúrguer com shrink-0 */}
-          <div className="flex lg:hidden items-center gap-2 shrink-0">
+          {/* ========================================================
+              ÁREA 4 (MOBILE E TABLETS < 1280px): Tema e Menu Hambúrguer
+             ======================================================== */}
+          <div className="flex xl:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Alternar Tema (Claro / Escuro) */}
             <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0" />
 
@@ -220,9 +231,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* GAVETA / MENU MOBILE RETRÁTIL */}
+      {/* GAVETA / MENU MOBILE E TABLETS (< 1280px) RETRÁTIL */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 px-4 pt-3 pb-6 shadow-2xl animate-in slide-in-from-top duration-200 max-h-[calc(100vh-4.5rem)] overflow-y-auto">
+        <div className="xl:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl px-4 pt-3 pb-8 shadow-2xl animate-in slide-in-from-top duration-200 max-h-[calc(100vh-4rem-env(safe-area-inset-top,0px))] sm:max-h-[calc(100vh-5rem-env(safe-area-inset-top,0px))] overflow-y-auto">
           {/* Card do Usuário Logado (Perfil Completo no Mobile) */}
           <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -278,6 +289,11 @@ export const Header: React.FC<HeaderProps> = ({
               );
             })}
 
+            {/* Notificações Push no Menu Mobile */}
+            <div className="pt-2">
+              <NotificationBanner />
+            </div>
+
             {/* Ações Rápidas no Menu Mobile: WhatsApp Oficial, Instagram e Instalação */}
             <div className="pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-2">
               {/* WhatsApp Oficial da Igreja */}
@@ -331,5 +347,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
     </header>
-  );
+
+    {/* Espaçador para compensar exatamente o cabeçalho fixo e garantir que o topo do conteúdo nunca fique oculto */}
+    <div
+      className="h-16 sm:h-20 w-full shrink-0 pt-[env(safe-area-inset-top,0px)] pointer-events-none select-none"
+      aria-hidden="true"
+    />
+  </>
+);
 };

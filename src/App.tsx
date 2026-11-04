@@ -79,7 +79,7 @@ const AuthenticatedApp: React.FC<AuthenticatedAppProps> = ({ isDark, onToggleThe
   }, [refreshLiveStatus, refreshVideosList]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen flex flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-200 overflow-x-clip w-full max-w-full">
       {/* Cabeçalho Fixo com Navegação, Logo, Tema, Instagram, WhatsApp e Perfil */}
       <Header
         currentPage={currentPage}

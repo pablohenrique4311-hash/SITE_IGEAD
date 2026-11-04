@@ -17,7 +17,9 @@ import {
   Info,
   ArrowLeft,
   Grid,
-  Filter
+  Filter,
+  Hash,
+  X
 } from 'lucide-react';
 import { BibleBook, BibleChapterData, BibleTranslationId, BibleVerse } from '../types';
 import {
@@ -30,6 +32,7 @@ import {
   parseBibleQuery
 } from '../services/bibleService';
 import { CATEGORY_LABELS } from '../services/bibleData';
+import { BibleSearchBar } from './BibleSearchBar';
 
 interface BibleReaderProps {
   initialBookId?: string;
@@ -68,9 +71,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
   // Filtros no seletor de livros
   const [bookSearchQuery, setBookSearchQuery] = useState('');
   const [activeTestamentFilter, setActiveTestamentFilter] = useState<'todos' | 'antigo' | 'novo'>('todos');
-
-  // Campo de busca rápida de referência
-  const [quickReferenceInput, setQuickReferenceInput] = useState('');
+  const [chapterNumberFilter, setChapterNumberFilter] = useState('');
 
   const currentBook = getBookById(selectedBookId) || books[0];
   const translationInfo = getTranslationInfo(translation);
@@ -216,27 +217,6 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Busca rápida de referência
-  const handleQuickSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickReferenceInput.trim()) return;
-
-    const parsed = parseBibleQuery(quickReferenceInput);
-    if (parsed) {
-      setSelectedBookId(parsed.book.id);
-      setCurrentChapter(parsed.chapter);
-      if (parsed.verse) {
-        setSelectedVerseNumber(parsed.verse);
-      }
-      setViewMode('reading');
-      setQuickReferenceInput('');
-      showToast(`Abrindo ${parsed.book.name} ${parsed.chapter}${parsed.verse ? `:${parsed.verse}` : ''}`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      showToast('Referência não encontrada. Exemplo: "Salmos 23" ou "João 3:16"');
-    }
-  };
-
   // Filtro de livros para a tela de livros
   const filterBookItem = (b: BibleBook) => {
     const matchSearch =
@@ -290,25 +270,20 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
             </p>
           </div>
 
-          {/* Barra de Busca de Referência Rápida */}
-          <form onSubmit={handleQuickSearch} className="max-w-2xl mx-auto">
-            <div className="relative flex items-center">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-4 pointer-events-none" />
-              <input
-                type="text"
-                value={quickReferenceInput}
-                onChange={(e) => setQuickReferenceInput(e.target.value)}
-                placeholder="Buscar por livro, capítulo ou versículo (ex: João 3:16, Salmos 23, Romanos 8)..."
-                className="w-full pl-11 pr-24 py-3.5 text-sm rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 shadow-xs transition-all"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:text-zinc-950 text-white transition-colors cursor-pointer"
-              >
-                Buscar
-              </button>
-            </div>
-          </form>
+          {/* Barra de Busca de Referência Rápida com Autocomplete Inteligente */}
+          <div className="max-w-2xl mx-auto w-full">
+            <BibleSearchBar
+              onSelectBook={handleSelectBook}
+              onSelectChapter={(book, chapter, verse) => {
+                setSelectedBookId(book.id);
+                setCurrentChapter(chapter);
+                if (verse) setSelectedVerseNumber(verse);
+                setViewMode('reading');
+                showToast(`Abrindo ${book.name} ${chapter}${verse ? `:${verse}` : ''}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          </div>
 
           {/* Filtros de Testamento e Tradução */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
@@ -533,6 +508,21 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
             </div>
           </div>
 
+          {/* Barra de Busca Rápida de Livro ou Capítulo */}
+          <BibleSearchBar
+            compact
+            placeholder={`Buscar outro livro ou capítulo da Bíblia (ex: Salmos 23, Mateus 5, Romanos)...`}
+            onSelectBook={handleSelectBook}
+            onSelectChapter={(book, chapter, verse) => {
+              setSelectedBookId(book.id);
+              setCurrentChapter(chapter);
+              if (verse) setSelectedVerseNumber(verse);
+              setViewMode('reading');
+              showToast(`Abrindo ${book.name} ${chapter}${verse ? `:${verse}` : ''}`);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+
           {/* Cartão de Apresentação do Livro */}
           <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 text-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20 mb-3">
@@ -549,29 +539,100 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
             </p>
           </div>
 
-          {/* Grade com os Números de Todos os Capítulos */}
-          <div className="bg-white dark:bg-zinc-900/60 p-6 sm:p-8 rounded-3xl border border-zinc-200/90 dark:border-zinc-800 shadow-xs">
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2.5 sm:gap-3">
-              {[...Array(currentBook.chaptersCount)].map((_, idx) => {
-                const chapterNum = idx + 1;
-                const isCurrent = chapterNum === currentChapter;
-                return (
+          {/* Grade com os Números de Todos os Capítulos + Salto Rápido de Capítulo */}
+          <div className="bg-white dark:bg-zinc-900/60 p-6 sm:p-8 rounded-3xl border border-zinc-200/90 dark:border-zinc-800 shadow-xs space-y-6">
+            {/* Campo de Salto Rápido / Filtro para Capítulos */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80">
+              <div className="flex items-center gap-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <Hash className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Buscar ou pular direto para um capítulo:</span>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const num = parseInt(chapterNumberFilter, 10);
+                  if (!isNaN(num) && num >= 1 && num <= currentBook.chaptersCount) {
+                    handleSelectChapter(num);
+                    setChapterNumberFilter('');
+                  } else {
+                    showToast(`Digite um número entre 1 e ${currentBook.chaptersCount}`);
+                  }
+                }}
+                className="flex items-center gap-2 w-full sm:w-auto"
+              >
+                <input
+                  type="number"
+                  min="1"
+                  max={currentBook.chaptersCount}
+                  value={chapterNumberFilter}
+                  onChange={(e) => setChapterNumberFilter(e.target.value)}
+                  placeholder={`1 a ${currentBook.chaptersCount}`}
+                  className="w-full sm:w-36 px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                />
+                {chapterNumberFilter && (
                   <button
-                    key={chapterNum}
                     type="button"
-                    onClick={() => handleSelectChapter(chapterNum)}
-                    className={`py-3 sm:py-3.5 rounded-2xl text-sm sm:text-base font-bold transition-all flex items-center justify-center cursor-pointer shadow-xs ${
-                      isCurrent
-                        ? 'bg-amber-600 text-white shadow-md scale-105'
-                        : 'bg-zinc-50 hover:bg-amber-500/15 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 hover:text-amber-700 dark:hover:text-amber-300 border border-zinc-200/80 dark:border-zinc-700 hover:border-amber-500/50 hover:scale-105'
-                    }`}
-                    aria-label={`Capítulo ${chapterNum}`}
+                    onClick={() => setChapterNumberFilter('')}
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                    title="Limpar filtro"
                   >
-                    {chapterNum}
+                    <X className="w-3.5 h-3.5" />
                   </button>
-                );
-              })}
+                )}
+                <button
+                  type="submit"
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-amber-600 hover:bg-amber-700 text-white cursor-pointer transition-colors shadow-xs shrink-0"
+                >
+                  Abrir
+                </button>
+              </form>
             </div>
+
+            {(() => {
+              const allChapters = [...Array(currentBook.chaptersCount)].map((_, idx) => idx + 1);
+              const displayedChapters = chapterNumberFilter.trim()
+                ? allChapters.filter((num) => num.toString().includes(chapterNumberFilter.trim()))
+                : allChapters;
+
+              if (displayedChapters.length === 0) {
+                return (
+                  <div className="py-8 text-center text-zinc-500 dark:text-zinc-400 space-y-2">
+                    <p className="text-xs">Nenhum capítulo correspondente a "{chapterNumberFilter}".</p>
+                    <button
+                      type="button"
+                      onClick={() => setChapterNumberFilter('')}
+                      className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                    >
+                      Mostrar todos os {currentBook.chaptersCount} capítulos
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2.5 sm:gap-3">
+                  {displayedChapters.map((chapterNum) => {
+                    const isCurrent = chapterNum === currentChapter;
+                    return (
+                      <button
+                        key={chapterNum}
+                        type="button"
+                        onClick={() => handleSelectChapter(chapterNum)}
+                        className={`py-3 sm:py-3.5 rounded-2xl text-sm sm:text-base font-bold transition-all flex items-center justify-center cursor-pointer shadow-xs ${
+                          isCurrent
+                            ? 'bg-amber-600 text-white shadow-md scale-105'
+                            : 'bg-zinc-50 hover:bg-amber-500/15 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 hover:text-amber-700 dark:hover:text-amber-300 border border-zinc-200/80 dark:border-zinc-700 hover:border-amber-500/50 hover:scale-105'
+                        }`}
+                        aria-label={`Capítulo ${chapterNum}`}
+                      >
+                        {chapterNum}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
 
             <div className="mt-8 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-center">
               <button
@@ -655,28 +716,25 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
             </div>
           </div>
 
-          {/* Barra de Busca de Referência Rápida (permanece no topo para buscas diretas) */}
-          <form onSubmit={handleQuickSearch} className="my-3">
-            <div className="relative flex items-center">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-4 pointer-events-none" />
-              <input
-                type="text"
-                value={quickReferenceInput}
-                onChange={(e) => setQuickReferenceInput(e.target.value)}
-                placeholder="Pesquisar por versículo ou referência direta (ex: João 3:16, Salmos 23, Mateus 5)..."
-                className="w-full pl-11 pr-24 py-2.5 text-xs sm:text-sm rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 px-3 py-1 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:text-zinc-950 text-white transition-colors cursor-pointer"
-              >
-                Buscar
-              </button>
-            </div>
-          </form>
+          {/* Barra de Busca de Referência Rápida com Autocomplete Inteligente */}
+          <div className="my-2">
+            <BibleSearchBar
+              compact
+              placeholder="Buscar outro livro ou capítulo (ex: Salmos 23, Mateus 5, João 3:16, Rm 8)..."
+              onSelectBook={handleSelectBook}
+              onSelectChapter={(book, chapter, verse) => {
+                setSelectedBookId(book.id);
+                setCurrentChapter(chapter);
+                if (verse) setSelectedVerseNumber(verse);
+                setViewMode('reading');
+                showToast(`Abrindo ${book.name} ${chapter}${verse ? `:${verse}` : ''}`);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          </div>
 
           {/* Barra Fixa de Controle de Leitura */}
-          <div className="sticky top-20 z-40 my-3 py-3 px-4 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="sticky top-16 sm:top-20 z-40 my-3 py-3 px-4 rounded-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
             {/* Botão Clicável do Livro e Capítulo (Reabre Seletor Instantaneamente) */}
             <div className="flex items-center gap-2">
               <button
