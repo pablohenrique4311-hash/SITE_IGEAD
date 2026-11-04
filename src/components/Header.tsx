@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
   Radio,
@@ -38,6 +38,32 @@ export const Header: React.FC<HeaderProps> = ({
   isLive
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobileMenuOpen(false);
+    };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [currentPage]);
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const { user, firstName, displayName, signOut, isWhatsAppAdmin } = useAuth();
 
@@ -80,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header
         style={{ paddingTop: 'var(--header-safe-top)' }}
-        className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 shadow-xs"
+        className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-white/95 dark:bg-zinc-950/95 border-b border-zinc-200/80 dark:border-zinc-800/80 transition-colors duration-200 shadow-xs [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-amber-500 [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-amber-500"
       >
         <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4 w-full">
@@ -88,16 +114,16 @@ export const Header: React.FC<HeaderProps> = ({
           {/* ========================================================
               ÁREA 1 (ESQUERDA): Logo Oficial, Nome IGEAD-MT e Selo
              ======================================================== */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center min-w-0">
             <button
               type="button"
               onClick={() => handleNavClick('home')}
-              className="flex items-center gap-2.5 sm:gap-3 text-left group cursor-pointer focus:outline-none shrink-0"
+              className="flex items-center gap-2 sm:gap-3 text-left group cursor-pointer rounded-xl min-w-0"
               aria-label="Página inicial da IGEAD-MT"
             >
               <ChurchLogo size="md" className="group-hover:scale-105 shrink-0 transition-transform duration-200" />
 
-              <div className="flex flex-col justify-center shrink-0 leading-tight">
+              <div className="flex min-w-0 flex-col justify-center leading-tight">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className="font-cinzel font-bold text-base sm:text-lg tracking-tight text-zinc-900 dark:text-zinc-50 whitespace-nowrap group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                     IGEAD-MT
@@ -108,14 +134,14 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
 
                   {isLive && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap leading-none">
+                    <span className="hidden min-[400px]:inline-flex items-center gap-1 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 sm:px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap leading-none">
                       <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                       AO VIVO
                     </span>
                   )}
                 </div>
 
-                <span className="hidden 2xl:inline text-[11px] text-zinc-500 dark:text-zinc-400 font-medium whitespace-nowrap mt-0.5">
+                <span className="hidden lg:inline text-[11px] text-zinc-500 dark:text-zinc-400 font-medium whitespace-nowrap mt-0.5">
                   Igreja Geração Eleita • Mato Grosso
                 </span>
               </div>
@@ -123,36 +149,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* ========================================================
-              ÁREA 2 (CENTRO): Links de Navegação Horizontal (Desktop)
+              Navegação desktop exibida na segunda linha para preservar espaço
              ======================================================== */}
-          <nav className="hidden xl:flex items-center justify-center gap-1 2xl:gap-1.5 shrink-0 px-2" aria-label="Navegação principal">
-            {navItems.map((item) => {
-              const isActive = currentPage === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleNavClick(item.id)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 2xl:px-3 py-1.5 rounded-xl text-xs 2xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
-                    isActive
-                      ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/25 shadow-2xs'
-                      : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
-                  }`}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+
 
           {/* ========================================================
-              ÁREA 3 (DIREITA - DESKTOP >= 1280px): Tema, Redes e Perfil
+              ÁREA 3 (DIREITA - DESKTOP >= 1024px): Tema, Redes e Perfil
              ======================================================== */}
-          <div className="hidden xl:flex items-center gap-2 2xl:gap-2.5 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
             {/* 1. Botão de alternar Tema (Lua/Sol) */}
-            <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0" />
+            <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0 min-h-11 min-w-11" />
 
             {/* 2. Ícone/link do Instagram Oficial (@igead_cba) */}
             <a
@@ -232,17 +238,19 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* ========================================================
-              ÁREA 4 (MOBILE E TABLETS < 1280px): Tema e Menu Hambúrguer
+              ÁREA 4 (MOBILE E TABLETS < 1024px): Tema e Menu Hambúrguer
              ======================================================== */}
-          <div className="flex xl:hidden items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Alternar Tema (Claro / Escuro) */}
-            <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0" />
+            <ThemeToggle isDark={isDark} onToggle={onToggleTheme} className="shrink-0 min-h-11 min-w-11" />
 
             {/* Botão Menu Hambúrguer (3 barrinhas / X) */}
             <button
               type="button"
+              ref={menuButtonRef}
+              aria-controls="header-mobile-menu"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="shrink-0 inline-flex items-center justify-center p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none cursor-pointer"
+              className="shrink-0 inline-flex items-center justify-center min-h-11 min-w-11 p-2 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
               aria-label={mobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
               aria-expanded={mobileMenuOpen}
             >
@@ -253,11 +261,34 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* GAVETA / MENU MOBILE E TABLETS (< 1280px) RETRÁTIL */}
+          <nav className="hidden lg:flex h-12 items-center justify-center gap-1 xl:gap-2 border-t border-zinc-200/70 dark:border-zinc-800/70 px-3" aria-label="Navegação principal">
+            {navItems.map((item) => {
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleNavClick(item.id)}
+                  className={`inline-flex items-center gap-1.5 px-3 xl:px-4 min-h-10 py-2 rounded-xl text-xs 2xl:text-sm font-medium transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
+                    isActive
+                      ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/25 shadow-2xs'
+                      : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
+                  }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+      {/* GAVETA / MENU MOBILE E TABLETS (< 1024px) RETRÁTIL */}
       {mobileMenuOpen && (
         <div
-          style={{ maxHeight: 'calc(100vh - var(--header-total-height))' }}
-          className="xl:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl px-4 pt-3 pb-8 shadow-2xl animate-in slide-in-from-top duration-200 overflow-y-auto"
+          id="header-mobile-menu"
+          style={{ maxHeight: 'calc(100dvh - var(--header-total-height))', paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 0px))' }}
+          className="lg:hidden overscroll-contain border-t border-zinc-200 dark:border-zinc-800 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl px-4 pt-3 pb-8 shadow-2xl animate-in slide-in-from-top duration-200 overflow-y-auto"
         >
           {/* Card do Usuário Logado (Perfil Completo no Mobile) */}
           <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-3">
@@ -320,7 +351,7 @@ export const Header: React.FC<HeaderProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => handleNavClick(item.id)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                  className={`flex items-center justify-between min-h-11 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
                     isActive
                       ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 font-semibold border border-amber-500/20'
                       : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/80'

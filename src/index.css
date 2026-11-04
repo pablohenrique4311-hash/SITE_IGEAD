@@ -6,13 +6,20 @@
   /* Variáveis de cálculo exato da altura do cabeçalho e Safe Area */
   --header-safe-top: env(safe-area-inset-top, 0px);
   --header-nav-height: 4rem; /* 64px no mobile */
-  --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top));
+  --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top) + 1px);
 }
 
 @media (min-width: 640px) {
   :root {
     --header-nav-height: 5rem; /* 80px em tablets e desktop */
-    --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top));
+    --header-total-height: calc(var(--header-nav-height) + var(--header-safe-top) + 1px);
+  }
+}
+
+/* Desktop: linha de identidade (80px) e navegação (48px). */
+@media (min-width: 1024px) {
+  :root {
+    --header-nav-height: 8rem;
   }
 }
 
