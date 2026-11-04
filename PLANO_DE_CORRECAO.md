@@ -175,3 +175,9 @@ Não enfraquecer as asserções para obter aprovação. Após a migração das i
 | Supabase e WhatsApp reais | Pendentes; nenhuma mensagem real enviada |
 
 O build ainda avisa sobre um chunk principal de aproximadamente 611 kB antes de gzip, frente a 740 kB no diagnóstico. As telas Bíblia e administração já são carregadas sob demanda; otimização adicional de bundle pode ser feita separadamente. O agendador, a retenção e o atendimento pastoral precisam ser provisionados antes de liberar a atualização em produção.
+
+## Impedimento identificado no GitHub Pages
+
+A consulta ao endpoint Pages retornou HTTP 404. A conta conectada tem permissão de escrita, mas `admin: false`; não pode habilitar o site pela configuração administrativa. Um administrador deve conferir **Settings → Pages → Build and deployment → Source → GitHub Actions** e, depois, executar o workflow da versão atual da `main`.
+
+O log apresentado contém `actions/configure-pages@v5`, etapa que não existe no workflow local atual; conferir também o commit da execução que falhou. Não foi habilitado Pages nem disparado deploy nesta verificação.
